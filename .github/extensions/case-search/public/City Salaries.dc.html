@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/nocturne-5223f3d0-36d8-45ce-9356-2ac9c8ce1793/styles.css">
+<script src="_ds/nocturne-5223f3d0-36d8-45ce-9356-2ac9c8ce1793/_ds_bundle.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap">
+<style>
+  body { margin: 0; background: #161826; }
+  a { color: var(--color-accent); text-decoration: none; }
+  a:hover { color: var(--color-accent-400); text-decoration: underline; }
+</style>
+</helmet>
+<div style="min-height:100vh; display:flex; flex-direction:column; background:var(--color-bg); color:var(--color-text); font-family:var(--font-body); font-size:14px">
+
+  <div style="flex:1; width:100%; max-width:1120px; margin:0 auto; padding:0 22.4px; box-sizing:border-box">
+
+    <div style="display:flex; flex-wrap:wrap; gap:16.8px; padding:16.8px 0 0; font-size:12.5px">
+      <a href="Case Search v2.dc.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Code enforcement cases</a>
+      <a href="Officers.dc.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Officers</a>
+      <a href="Planning Projects.dc.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Planning projects</a>
+      <a href="Contractors.dc.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Contractors</a>
+      <a href="Building Permits.dc.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Building permits</a>
+      <a href="Inspections.dc.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Inspections</a>
+      <a href="Parcel Map.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Parcel map</a>
+      <a href="Public Works.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Public works</a>
+      <span style="color:var(--color-accent-300)">Salaries</span>
+    </div>
+
+    <div style="margin-top:22.4px">
+      <h1 style="font-size:26px; margin:0 0 8.4px; letter-spacing:-0.02em">City Employee Pay</h1>
+      <p style="margin:0 0 16.8px; font-size:14.5px; line-height:1.55; max-width:660px; color:color-mix(in srgb, var(--color-text) 68%, transparent); text-wrap:pretty">Every position on the city payroll, with base pay, overtime, other compensation and gross wages. Search a name or a job title, or switch to the title view to compare roles.</p>
+
+      <div style="display:flex; flex-wrap:wrap; gap:8.4px; align-items:center">
+        <div style="position:relative; display:flex; align-items:center; flex:1; min-width:240px; max-width:420px">
+          <svg width="17" height="17" viewBox="0 0 256 256" fill="currentColor" style="position:absolute; left:11px; opacity:0.4; pointer-events:none"><path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"></path></svg>
+          <input class="input" value="{{ q }}" onChange="{{ onQuery }}" placeholder="Name or title — police officer, code compliance…" style="width:100%; padding:9px 11.2px 9px 36px; font-size:14px">
+        </div>
+        <div class="seg">
+          <button class="seg-opt" onClick="{{ onPeople }}" style="cursor:pointer; background:{{ bgPeople }}; color:inherit; font-family:var(--font-body); font-size:13px; border:0; padding:7px 14px">People</button>
+          <button class="seg-opt" onClick="{{ onTitles }}" style="cursor:pointer; background:{{ bgTitles }}; color:inherit; font-family:var(--font-body); font-size:13px; border:0; padding:7px 14px">By title</button>
+        </div>
+        <select class="input" value="{{ sort }}" onChange="{{ onSort }}" style="padding:9px 8.4px; font-size:13px">
+          <option value="gross">Highest gross</option>
+          <option value="base">Highest base</option>
+          <option value="ot">Most overtime</option>
+          <option value="name">Name, A–Z</option>
+          <option value="title">Title, A–Z</option>
+        </select>
+        <label style="display:flex; align-items:center; gap:5.6px; font-size:12.5px; color:color-mix(in srgb, var(--color-text) 60%, transparent)">
+          <input type="checkbox" checked="{{ otOnly }}" onChange="{{ onOtOnly }}" style="accent-color:var(--color-accent)">
+          Overtime over $20k
+        </label>
+      </div>
+
+      <div style="display:flex; flex-wrap:wrap; gap:22.4px; margin-top:16.8px; font-size:12.5px; color:color-mix(in srgb, var(--color-text) 55%, transparent)">
+        <div>Shown <span style="color:var(--color-text)">{{ shownCount }}</span></div>
+        <div>Gross <span style="color:var(--color-accent-300)">{{ grossSum }}</span></div>
+        <div>Overtime <span style="color:var(--color-text)">{{ otSum }}</span></div>
+        <div>Median gross <span style="color:var(--color-text)">{{ medianGross }}</span></div>
+        <div>{{ loadLabel }}</div>
+      </div>
+    </div>
+
+    <div style="margin-top:16.8px">
+      <div style="display:flex; align-items:baseline; gap:8.4px; margin-bottom:5.6px">
+        <div style="font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--color-accent)">Departments</div>
+        <sc-if value="{{ hasCrumb }}" hint-placeholder-val="{{ false }}">
+          <button class="btn btn-ghost" onClick="{{ onClearPicks }}" style="font-size:12px">{{ crumb }} ✕</button>
+        </sc-if>
+      </div>
+      <div style="display:flex; flex-wrap:wrap; gap:5.6px">
+        <sc-for list="{{ deptButtons }}" as="d" hint-placeholder-count="10">
+          <button class="btn btn-secondary" onClick="{{ d.onPick }}" style="font-size:12.5px; background:{{ d.bg }}">{{ d.label }}</button>
+        </sc-for>
+      </div>
+
+      <sc-if value="{{ showTitleButtons }}" hint-placeholder-val="{{ true }}">
+        <div style="margin-top:16.8px">
+          <div style="font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--color-accent); margin-bottom:5.6px">{{ titleHeading }}</div>
+          <div style="display:flex; flex-wrap:wrap; gap:5.6px">
+            <sc-for list="{{ titleButtons }}" as="t" hint-placeholder-count="12">
+              <button class="btn btn-secondary" onClick="{{ t.onPick }}" style="font-size:12px; background:{{ t.bg }}">{{ t.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+
+    <sc-if value="{{ isPeople }}" hint-placeholder-val="{{ true }}">
+      <div style="margin-top:22.4px">
+        <div style="display:grid; grid-template-columns:minmax(150px,1fr) minmax(180px,1.2fr) 112px 112px 104px 116px; gap:11.2px; padding:0 8.4px 8.4px; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:color-mix(in srgb, var(--color-text) 55%, transparent)">
+          <div>Employee</div><div>Title</div><div style="text-align:right">Base</div><div style="text-align:right">Overtime</div><div style="text-align:right">Other</div><div style="text-align:right">Gross</div>
+        </div>
+        <sc-for list="{{ people }}" as="p" hint-placeholder-count="16">
+          <div style="border-top:1px solid var(--color-divider); display:grid; grid-template-columns:minmax(150px,1fr) minmax(180px,1.2fr) 112px 112px 104px 116px; gap:11.2px; align-items:baseline; padding:9px 8.4px; font-size:13.5px">
+            <div style="color:{{ p.nameColor }}">{{ p.name }}</div>
+            <div style="color:color-mix(in srgb, var(--color-text) 75%, transparent); font-size:12.5px">{{ p.title }}</div>
+            <div style="text-align:right; font-variant-numeric:tabular-nums; color:color-mix(in srgb, var(--color-text) 70%, transparent)">{{ p.base }}</div>
+            <div style="text-align:right; font-variant-numeric:tabular-nums; color:{{ p.otColor }}">{{ p.ot }}</div>
+            <div style="text-align:right; font-variant-numeric:tabular-nums; color:color-mix(in srgb, var(--color-text) 70%, transparent)">{{ p.other }}</div>
+            <div style="text-align:right; font-variant-numeric:tabular-nums">{{ p.gross }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isTitles }}" hint-placeholder-val="{{ false }}">
+      <div style="margin-top:22.4px">
+        <div style="display:grid; grid-template-columns:minmax(200px,1fr) 76px 124px 124px 124px; gap:11.2px; padding:0 8.4px 8.4px; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:color-mix(in srgb, var(--color-text) 55%, transparent)">
+          <div>Title</div><div style="text-align:right">People</div><div style="text-align:right">Median gross</div><div style="text-align:right">Overtime</div><div style="text-align:right">Total gross</div>
+        </div>
+        <sc-for list="{{ titles }}" as="t" hint-placeholder-count="14">
+          <div onClick="{{ t.onPick }}" style="border-top:1px solid var(--color-divider); display:grid; grid-template-columns:minmax(200px,1fr) 76px 124px 124px 124px; gap:11.2px; align-items:baseline; padding:9px 8.4px; font-size:13.5px; cursor:pointer">
+            <div>{{ t.title }}</div>
+            <div style="text-align:right; font-variant-numeric:tabular-nums; color:color-mix(in srgb, var(--color-text) 70%, transparent)">{{ t.n }}</div>
+            <div style="text-align:right; font-variant-numeric:tabular-nums">{{ t.median }}</div>
+            <div style="text-align:right; font-variant-numeric:tabular-nums; color:{{ t.otColor }}">{{ t.ot }}</div>
+            <div style="text-align:right; font-variant-numeric:tabular-nums; color:color-mix(in srgb, var(--color-text) 70%, transparent)">{{ t.total }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ hasMore }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:16.8px 8.4px; border-top:1px solid var(--color-divider)">
+        <button class="btn btn-secondary" onClick="{{ onMore }}" style="font-size:13px">{{ moreLabel }}</button>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:48px 0; font-size:15px; color:color-mix(in srgb, var(--color-text) 60%, transparent)">Nothing matched that search.</div>
+    </sc-if>
+
+    <div style="margin-top:33.6px; padding-top:16.8px; border-top:1px solid var(--color-divider); max-width:660px; font-size:12.5px; line-height:1.6; color:color-mix(in srgb, var(--color-text) 50%, transparent); text-wrap:pretty">{{ note }}</div>
+  </div>
+
+  <div style="flex:none; margin-top:56px; padding:16.8px 22.4px 22.4px">
+    <div style="max-width:1120px; margin:0 auto; display:flex; flex-wrap:wrap; gap:11.2px; justify-content:space-between; font-size:11.5px; color:color-mix(in srgb, var(--color-text) 42%, transparent)">
+      <div>{{ sourceLabel }}. Figures as published.</div>
+      <div>by Chano</div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{}">
+const PAGE = 60;
+
+/* the report has no department column — these group the 384 job titles into
+   the departments the titles themselves name, tested in order */
+const DEPTS = [
+  ["Police", /POLICE|^POL |CRIME|EVIDENCE|VICTIM|FORENSIC|DISPATCH|CRIMINALIST|SCHOOL RESOURCE/],
+  ["Fire & EMS", /FIRE|PARAMEDIC|\bEMS\b|EMERGENCY M/],
+  ["Utilities", /UTILIT|WATER|SEWER|WASTEWATER|RECLAIM|\bPLANT\b|LIFT STATION|METER|IRRIGATION/],
+  ["Public Works", /PUBLIC WORKS|STREET|TRAFFIC|FLEET|STORM|CANAL|SOLID WASTE|EQUIPMENT OPER|MAINT MECHANIC|MAINTENANCE WORKER|CUSTODIAN|LANDSCAP|MOSQUITO/],
+  ["Parks & Recreation", /RECREATION|\bPARK|ATHLETIC|AQUATIC|GOLF|TENNIS|YACHT|SPECIAL POPULATION|CAMP|^CT /],
+  ["Development & Code", /CODE|PERMIT|PLANS EXAMINER|BUILDING INSPECT|PLANNER|PLANNING|ZONING|ORDINANCE|CONSTRUCTION INSPECTOR|LICENS|SURVEY|ENGINEER/],
+  ["Finance & Admin", /FINANC|ACCOUNT|BUDGET|PAYROLL|PROCUREMENT|PURCHAS|CUSTOMER SRVC|BILLING|CLERK|ADMINISTRATIVE|HUMAN RESOURCE|\bHR\b|RISK|RECORDS/],
+  ["IT & GIS", /INFORMATION TECH|\bIT\b|\bGIS\b|SYSTEMS|NETWORK|PROGRAMMER|DATABASE|TELECOM/],
+  ["Legal", /ATTORNEY|LEGAL|PARALEGAL/],
+  ["Executive", /CITY MANAGER|MAYOR|COUNCIL|CITY AUDITOR|PUBLIC INFORMATION/]
+];
+function deptOf(title) {
+  const t = String(title || "").toUpperCase();
+  for (let i = 0; i < DEPTS.length; i++) if (DEPTS[i][1].test(t)) return DEPTS[i][0];
+  return "Other";
+}
+function money(n) {
+  const v = Number(n) || 0;
+  return "$" + Math.round(v).toLocaleString();
+}
+function median(list) {
+  if (!list.length) return 0;
+  const s = list.slice().sort((a, b) => a - b);
+  const m = Math.floor(s.length / 2);
+  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+}
+
+class Component extends DCLogic {
+  state = { q: "", view: "people", sort: "gross", otOnly: false, limit: PAGE, data: null, error: "", dept: "", title: "", source: "", live: false };
+
+  componentDidMount() {
+    this.loadPdf();
+    this.tryLive();
+  }
+
+  /* the published report — always loaded, so the page works regardless */
+  loadPdf() {
+    fetch("salaries.json")
+      .then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+      .then(j => {
+        if (this.state.live) return; // live already won
+        this.setState({ data: (j.records || []).map(r => Object.assign({ dept: deptOf(r.title) }, r)), source: "report" });
+      })
+      .catch(e => { if (!this.state.data) this.setState({ error: String(e.message || e) }); });
+  }
+
+  /* the city's Salary_Data table returns counts but never rows today.
+     Try it anyway with a hard timeout — the day it's fixed, this page uses it. */
+  tryLive() {
+    const base = "https://capeims.capecoral.gov/arcgis/rest/services/OpenData/OpenData/MapServer/3/query?";
+    const ctl = new AbortController();
+    const timer = setTimeout(() => ctl.abort(), 9000);
+    fetch(base + "where=1%3D1&outFields=*&resultRecordCount=4000&returnGeometry=false&f=json", { signal: ctl.signal })
+      .then(r => r.json())
+      .then(j => {
+        clearTimeout(timer);
+        const feats = (j && j.features) || [];
+        if (feats.length < 100) return; // not a real payload — keep the report
+        const num = v => Number(v) || 0;
+        const recs = feats.map((f, i) => {
+          const a = f.attributes;
+          const last = String(a.LastName || "").trim() || "REDACTED";
+          const title = String(a.PositionCodeDescription || "").trim() || "REDACTED";
+          return {
+            id: String(a.Objectid || i), last, first: String(a.FirstName || "").trim(),
+            title, dept: deptOf(title),
+            base: num(a.Base), ot: num(a.Overtime), other: num(a.Other),
+            gross: num(a.GrossWages) || num(a.AnnualSalary),
+            month: String(a.Month || "").trim()
+          };
+        }).filter(r => r.gross > 0);
+        if (recs.length < 100) return;
+        this.setState({ data: recs, source: "live", live: true, error: "" });
+      })
+      .catch(() => { clearTimeout(timer); /* silent — the report is already up */ });
+  }
+
+  renderVals() {
+    const st = this.state;
+    const all = st.data || [];
+    const q = st.q.trim().toLowerCase();
+
+    const matches = all.filter(r =>
+      (!st.otOnly || r.ot >= 20000) &&
+      (!st.dept || r.dept === st.dept) &&
+      (!st.title || r.title === st.title) &&
+      (!q || (r.last + " " + r.first + " " + r.title).toLowerCase().indexOf(q) !== -1));
+
+    /* department buttons — counted on everything except the department pick itself */
+    const deptPool = all.filter(r =>
+      (!st.otOnly || r.ot >= 20000) &&
+      (!q || (r.last + " " + r.first + " " + r.title).toLowerCase().indexOf(q) !== -1));
+    const deptCounts = {};
+    deptPool.forEach(r => { deptCounts[r.dept] = (deptCounts[r.dept] || 0) + 1; });
+    const deptButtons = DEPTS.map(d => d[0]).concat(["Other"])
+      .filter(name => deptCounts[name])
+      .map(name => ({
+        label: name + " " + deptCounts[name],
+        bg: st.dept === name ? "color-mix(in srgb, var(--color-accent) 24%, transparent)" : "transparent",
+        onPick: () => this.setState(s => ({ dept: s.dept === name ? "" : name, title: "", limit: PAGE }))
+      }));
+
+    /* title buttons inside the chosen department */
+    const titlePool = {};
+    deptPool.filter(r => !st.dept || r.dept === st.dept).forEach(r => {
+      titlePool[r.title] = (titlePool[r.title] || 0) + 1;
+    });
+    const titleButtons = Object.keys(titlePool)
+      .sort((a, b) => titlePool[b] - titlePool[a] || (a < b ? -1 : 1))
+      .slice(0, 28)
+      .map(t => ({
+        label: (t === "REDACTED" ? "Withheld" : t) + " " + titlePool[t],
+        bg: st.title === t ? "color-mix(in srgb, var(--color-accent) 24%, transparent)" : "transparent",
+        onPick: () => this.setState(s => ({ title: s.title === t ? "" : t, view: "people", limit: PAGE }))
+      }));
+
+    const grossSum = matches.reduce((a, r) => a + r.gross, 0);
+    const otSum = matches.reduce((a, r) => a + r.ot, 0);
+
+    const sorted = matches.slice().sort((a, b) => {
+      if (st.sort === "base") return b.base - a.base;
+      if (st.sort === "ot") return b.ot - a.ot;
+      if (st.sort === "name") return (a.last + a.first) < (b.last + b.first) ? -1 : 1;
+      if (st.sort === "title") return a.title === b.title ? b.gross - a.gross : (a.title < b.title ? -1 : 1);
+      return b.gross - a.gross;
+    });
+
+    const byTitle = {};
+    matches.forEach(r => {
+      (byTitle[r.title] = byTitle[r.title] || []).push(r);
+    });
+    const titleRows = Object.keys(byTitle).map(t => {
+      const g = byTitle[t];
+      return {
+        title: t, n: g.length,
+        med: median(g.map(r => r.gross)),
+        ot: g.reduce((a, r) => a + r.ot, 0),
+        total: g.reduce((a, r) => a + r.gross, 0)
+      };
+    }).sort((a, b) => {
+      if (st.sort === "title" || st.sort === "name") return a.title < b.title ? -1 : 1;
+      if (st.sort === "ot") return b.ot - a.ot;
+      if (st.sort === "base") return b.med - a.med;
+      return b.total - a.total;
+    });
+
+    const isPeople = st.view === "people";
+    const shownList = isPeople ? sorted.slice(0, st.limit) : titleRows.slice(0, st.limit);
+    const listLen = isPeople ? sorted.length : titleRows.length;
+
+    return {
+      q: st.q, sort: st.sort, otOnly: st.otOnly,
+      isPeople, isTitles: !isPeople,
+      bgPeople: isPeople ? "color-mix(in srgb, var(--color-accent) 22%, transparent)" : "transparent",
+      bgTitles: isPeople ? "transparent" : "color-mix(in srgb, var(--color-accent) 22%, transparent)",
+      loadLabel: st.error ? "Could not load the salary file: " + st.error : (st.data ? "" : "Loading the salary report…"),
+      shownCount: st.data ? (isPeople ? matches.length.toLocaleString() + " people" : titleRows.length.toLocaleString() + " titles") : "—",
+      grossSum: st.data ? money(grossSum) : "—",
+      otSum: st.data ? money(otSum) : "—",
+      medianGross: st.data && matches.length ? money(median(matches.map(r => r.gross))) : "—",
+      isEmpty: !!st.data && matches.length === 0,
+      deptButtons, titleButtons,
+      titleHeading: st.dept ? "Titles in " + st.dept : "Most common titles",
+      showTitleButtons: titleButtons.length > 1,
+      crumb: st.dept || st.title ? [st.dept, st.title === "REDACTED" ? "Withheld" : st.title].filter(Boolean).join(" · ") : "",
+      hasCrumb: !!(st.dept || st.title),
+      onClearPicks: () => this.setState({ dept: "", title: "", limit: PAGE }),
+      people: (isPeople ? shownList : []).map(r => ({
+        name: r.last === "REDACTED" ? "Redacted" : (r.last + ", " + r.first),
+        nameColor: r.last === "REDACTED" ? "color-mix(in srgb, var(--color-text) 45%, transparent)" : "var(--color-text)",
+        title: r.title === "REDACTED" ? "Withheld" : r.title,
+        base: money(r.base), ot: money(r.ot), other: money(r.other), gross: money(r.gross),
+        otColor: r.ot >= 20000 ? "var(--color-accent-300)" : "color-mix(in srgb, var(--color-text) 70%, transparent)"
+      })),
+      titles: (isPeople ? [] : shownList).map(t => ({
+        title: t.title, n: t.n.toLocaleString(),
+        onPick: () => this.setState({ title: t.title, view: "people", limit: PAGE }),
+        median: money(t.med), ot: money(t.ot), total: money(t.total),
+        otColor: t.ot >= 100000 ? "var(--color-accent-300)" : "color-mix(in srgb, var(--color-text) 70%, transparent)"
+      })),
+      hasMore: listLen > shownList.length,
+      moreLabel: "Show " + Math.min(PAGE, listLen - shownList.length) + " more",
+      onMore: () => this.setState(s => ({ limit: s.limit + PAGE })),
+      note: st.data
+        ? "The report lists " + all.length.toLocaleString() + " positions and " + money(all.reduce((a, r) => a + r.gross, 0)) + " in gross wages across " + Object.keys(all.reduce((m, r) => (m[r.title] = 1, m), {})).length + " job titles. " + all.filter(r => r.last === "REDACTED").length + " records are redacted at the source — their pay is published but their name and title are not, which is why they appear here without either. The report carries no department field, so the title view is the closest grouping to a department comparison."
+        : "Reading the city's published salary report.",
+      sourceLabel: st.source === "live" ? "Live from the city's salary table" : (st.data ? "From the published salary report" : ""),
+      onQuery: e => this.setState({ q: e.target.value, limit: PAGE }),
+      onSort: e => this.setState({ sort: e.target.value, limit: PAGE }),
+      onOtOnly: e => this.setState({ otOnly: e.target.checked, limit: PAGE }),
+      onPeople: () => this.setState({ view: "people", limit: PAGE }),
+      onTitles: () => this.setState({ view: "titles", limit: PAGE })
+    };
+  }
+}
+</script>
+</body>
+</html>

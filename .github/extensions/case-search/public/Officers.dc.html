@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/nocturne-5223f3d0-36d8-45ce-9356-2ac9c8ce1793/styles.css">
+<script src="_ds/nocturne-5223f3d0-36d8-45ce-9356-2ac9c8ce1793/_ds_bundle.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap">
+<style>
+  body { margin: 0; background: #161826; }
+  a { color: var(--color-accent); text-decoration: none; }
+  a:hover { color: var(--color-accent-400); text-decoration: underline; }
+</style>
+</helmet>
+<div style="min-height:100vh; display:flex; flex-direction:column; background:var(--color-bg); color:var(--color-text); font-family:var(--font-body); font-size:14px">
+
+  <div style="flex:1; width:100%; max-width:1120px; margin:0 auto; padding:0 22.4px; box-sizing:border-box">
+
+    <div style="display:flex; flex-wrap:wrap; gap:16.8px; padding:16.8px 0 0; font-size:12.5px">
+      <a href="Case Search v2.dc.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Code enforcement cases</a>
+      <span style="color:var(--color-accent-300)">Officers</span>
+      <a href="Planning Projects.dc.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Planning projects</a>
+      <a href="Contractors.dc.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Contractors</a>
+      <a href="Building Permits.dc.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Building permits</a>
+      <a href="Inspections.dc.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Inspections</a>
+      <a href="Parcel Map.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Parcel map</a>
+      <a href="Public Works.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Public works</a>
+      <a href="City Salaries.dc.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Salaries</a>
+    </div>
+
+    <div style="margin-top:22.4px">
+      <div style="display:flex; align-items:baseline; gap:8.4px; flex-wrap:wrap">
+        <h1 style="font-size:26px; margin:0; letter-spacing:-0.02em">Search by Code Enforcement Officer</h1>
+        <span class="tag tag-outline" style="align-self:center">Live</span>
+      </div>
+      <p style="margin:8.4px 0 16.8px; font-size:14.5px; line-height:1.55; max-width:640px; color:color-mix(in srgb, var(--color-text) 68%, transparent); text-wrap:pretty">Everyone who has updated a code case, with how many cases they've touched and how many are still open. Pick a name to see that person's caseload.</p>
+
+      <div style="display:flex; flex-wrap:wrap; gap:8.4px; align-items:center; max-width:620px">
+        <div style="position:relative; display:flex; align-items:center; flex:1; min-width:220px">
+          <svg width="17" height="17" viewBox="0 0 256 256" fill="currentColor" style="position:absolute; left:11px; opacity:0.4; pointer-events:none"><path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"></path></svg>
+          <input class="input" value="{{ q }}" onChange="{{ onQuery }}" placeholder="Filter by name or zone…" style="width:100%; padding:9px 11.2px 9px 36px; font-size:14px">
+        </div>
+        <select class="input" value="{{ sort }}" onChange="{{ onSort }}" style="padding:9px 8.4px; font-size:13px">
+          <option value="open">Most open cases</option>
+          <option value="total">Most cases overall</option>
+          <option value="name">Name, A–Z</option>
+          <option value="zone">Zone</option>
+        </select>
+        <label style="display:flex; align-items:center; gap:5.6px; font-size:12.5px; color:color-mix(in srgb, var(--color-text) 60%, transparent)">
+          <input type="checkbox" checked="{{ zonedOnly }}" onChange="{{ onZonedOnly }}" style="accent-color:var(--color-accent)">
+          Zone officers only
+        </label>
+      </div>
+
+      <div style="display:flex; flex-wrap:wrap; gap:22.4px; margin-top:16.8px; font-size:12.5px; color:color-mix(in srgb, var(--color-text) 55%, transparent)">
+        <div>Names in the file <span style="color:var(--color-text)">{{ nameCount }}</span></div>
+        <div>Open cases, shown <span style="color:var(--color-accent-300)">{{ openSum }}</span></div>
+        <div>Cases, shown <span style="color:var(--color-text)">{{ totalSum }}</span></div>
+        <div>{{ loadLabel }}</div>
+      </div>
+    </div>
+
+    <div style="margin-top:22.4px">
+      <div style="display:grid; grid-template-columns:minmax(180px,1fr) 168px 108px 108px 128px; gap:11.2px; padding:0 8.4px 8.4px; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:color-mix(in srgb, var(--color-text) 55%, transparent)">
+        <div>Officer</div><div>Zone</div><div style="text-align:right">Open</div><div style="text-align:right">All cases</div><div></div>
+      </div>
+      <sc-for list="{{ rows }}" as="r" hint-placeholder-count="14">
+        <div style="border-top:1px solid var(--color-divider); display:grid; grid-template-columns:minmax(180px,1fr) 168px 108px 108px 128px; gap:11.2px; align-items:center; padding:9px 8.4px; font-size:13.5px">
+          <div>{{ r.name }}</div>
+          <div style="font-size:12.5px; color:color-mix(in srgb, var(--color-text) 60%, transparent)">{{ r.zoneLabel }}</div>
+          <div style="text-align:right; font-variant-numeric:tabular-nums; color:{{ r.openColor }}">{{ r.open }}</div>
+          <div style="text-align:right; font-variant-numeric:tabular-nums; color:color-mix(in srgb, var(--color-text) 70%, transparent)">{{ r.total }}</div>
+          <div style="text-align:right"><a class="btn btn-secondary" href="{{ r.href }}" style="font-size:12.5px">View cases</a></div>
+        </div>
+      </sc-for>
+
+      <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:48px 0; font-size:15px; color:color-mix(in srgb, var(--color-text) 60%, transparent)">No one matches that filter.</div>
+      </sc-if>
+    </div>
+
+    <div style="margin-top:33.6px; padding-top:16.8px; border-top:1px solid var(--color-divider); max-width:640px; font-size:12.5px; line-height:1.6; color:color-mix(in srgb, var(--color-text) 50%, transparent); text-wrap:pretty">The file records whoever last updated each case, so this list includes system accounts and past staff alongside current officers. Zones come from the city's enforcement-zone assignments; a name with no zone either works citywide or is no longer on the zone roster.</div>
+  </div>
+
+  <div style="flex:none; margin-top:56px; padding:16.8px 22.4px 22.4px">
+    <div style="max-width:1120px; margin:0 auto; display:flex; flex-wrap:wrap; gap:11.2px; justify-content:space-between; font-size:11.5px; color:color-mix(in srgb, var(--color-text) 42%, transparent)">
+      <div>Counts are grouped live from the City of Cape Coral open-data code enforcement file.</div>
+      <div>by Chano</div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{}">
+const SERVICE = "https://capeims.capecoral.gov/arcgis/rest/services/OpenData/OpenData/MapServer/5";
+const STATS = JSON.stringify([{ statisticType: "count", onStatisticField: "CaseNumber", outStatisticFieldName: "n" }]);
+const SYSTEM = ["legacy user", "energov service", "service, energov", "user, legacy"];
+
+const ZONE_OFFICER = {
+  "NE1":"Martin Lehman","NE2":"Stephanie Folsom","NE3":"Pam Beesley-Farris","NE4":"Tammy Whitaker","NE5":"Patrick Hayhurst",
+  "NW1":"ioulia Scott","NW2":"Jeffrey Colon","NW3":"Scott Irvin","NW4":"Sherry Kluczynski",
+  "SE1":"Casey Fears","SE2":"Mark Donisi","SE3":"Samantha Altman","SE4":"Frank John","SE5":"Robert Liguori","SE6":"Thalia Curtis",
+  "SW1":"Pete Strainovici","SW2":"John Williams","SW3":"Mack Cline","SW4":"Aaron Hurley","SW5":"Michael Stuff","SW6":"Jamal Crawford",
+  "MC-N":"Eric Speranza","MC-C":"David Zimmer","MC-S":"Andrew Wagner"
+};
+function nameKey(s) {
+  return String(s || "").toLowerCase().replace(/[^a-z\s-]/g, " ").split(/\s+/).filter(Boolean).sort().join(" ");
+}
+const ZONE_BY_NAME = {};
+Object.keys(ZONE_OFFICER).forEach(z => { ZONE_BY_NAME[nameKey(ZONE_OFFICER[z])] = z; });
+
+function url(params) {
+  return SERVICE + "/query?" + Object.keys(params).map(k => k + "=" + encodeURIComponent(params[k])).join("&");
+}
+
+class Component extends DCLogic {
+  state = { q: "", sort: "open", zonedOnly: false, people: [], loading: true, error: "" };
+
+  componentDidMount() {
+    const grouped = where => fetch(url({
+      where, groupByFieldsForStatistics: "UpdatedBy", outStatistics: STATS,
+      orderByFields: "n DESC", returnGeometry: "false", f: "json"
+    })).then(r => r.json());
+
+    Promise.all([grouped("1=1"), grouped("Status NOT LIKE 'Closed%'")])
+      .then(([all, open]) => {
+        if (all.error) throw new Error(all.error.message || "service error");
+        const openBy = {};
+        (open.features || []).forEach(f => { openBy[f.attributes.UpdatedBy] = f.attributes.n; });
+        const people = (all.features || [])
+          .map(f => {
+            const name = (f.attributes.UpdatedBy || "").trim();
+            return {
+              name: name || "(no name recorded)",
+              total: f.attributes.n || 0,
+              open: openBy[f.attributes.UpdatedBy] || 0,
+              zone: ZONE_BY_NAME[nameKey(name)] || "",
+              system: SYSTEM.indexOf(name.toLowerCase()) !== -1
+            };
+          })
+          .filter(p => p.name);
+        this.setState({ people, loading: false });
+      })
+      .catch(e => this.setState({ loading: false, error: String(e.message || e) }));
+  }
+
+  renderVals() {
+    const st = this.state;
+    const q = st.q.trim().toLowerCase();
+    let rows = st.people.filter(p =>
+      (!st.zonedOnly || !!p.zone) &&
+      (!q || p.name.toLowerCase().indexOf(q) !== -1 || p.zone.toLowerCase().indexOf(q) !== -1));
+
+    rows.sort((a, b) => {
+      if (st.sort === "name") return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
+      if (st.sort === "total") return b.total - a.total;
+      if (st.sort === "zone") {
+        if (!a.zone !== !b.zone) return a.zone ? -1 : 1;
+        return a.zone < b.zone ? -1 : a.zone > b.zone ? 1 : b.open - a.open;
+      }
+      return b.open - a.open || b.total - a.total;
+    });
+
+    const sum = (k) => rows.reduce((n, r) => n + r[k], 0);
+
+    return {
+      q: st.q, sort: st.sort, zonedOnly: st.zonedOnly,
+      nameCount: st.people.length ? st.people.length.toLocaleString() : "—",
+      openSum: rows.length ? sum("open").toLocaleString() : "—",
+      totalSum: rows.length ? sum("total").toLocaleString() : "—",
+      loadLabel: st.error ? "Case service error: " + st.error : (st.loading ? "Grouping cases by officer…" : ""),
+      isEmpty: !st.loading && !st.error && rows.length === 0,
+      rows: rows.map(r => ({
+        name: r.name,
+        zoneLabel: r.zone ? "Zone " + r.zone : (r.system ? "System account" : "—"),
+        open: r.open.toLocaleString(),
+        total: r.total.toLocaleString(),
+        openColor: r.open > 0 ? "var(--color-accent-300)" : "color-mix(in srgb, var(--color-text) 45%, transparent)",
+        href: "Case Search v2.dc.html#officer=" + encodeURIComponent(r.name)
+      })),
+      onQuery: e => this.setState({ q: e.target.value }),
+      onSort: e => this.setState({ sort: e.target.value }),
+      onZonedOnly: e => this.setState({ zonedOnly: e.target.checked })
+    };
+  }
+}
+</script>
+</body>
+</html>

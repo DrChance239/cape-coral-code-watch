@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/nocturne-5223f3d0-36d8-45ce-9356-2ac9c8ce1793/styles.css">
+<script src="_ds/nocturne-5223f3d0-36d8-45ce-9356-2ac9c8ce1793/_ds_bundle.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap">
+<style>
+  body { margin: 0; background: #161826; }
+  a { color: var(--color-accent); text-decoration: none; }
+  a:hover { color: var(--color-accent-400); text-decoration: underline; }
+</style>
+</helmet>
+<div style="min-height:100vh; display:flex; flex-direction:column; background:var(--color-bg); color:var(--color-text); font-family:var(--font-body); font-size:14px">
+
+  <div style="flex:1; width:100%; max-width:1120px; margin:0 auto; padding:0 22.4px; box-sizing:border-box">
+
+    <div style="display:flex; flex-wrap:wrap; gap:16.8px; padding:16.8px 0 0; font-size:12.5px">
+      <a href="Case Search v2.dc.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Code enforcement cases</a>
+      <a href="Officers.dc.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Officers</a>
+      <a href="Planning Projects.dc.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Planning projects</a>
+      <a href="Contractors.dc.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Contractors</a>
+      <span style="color:var(--color-accent-300)">Building permits</span>
+      <a href="Inspections.dc.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Inspections</a>
+      <a href="Parcel Map.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Parcel map</a>
+      <a href="Public Works.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Public works</a>
+      <a href="City Salaries.dc.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Salaries</a>
+    </div>
+
+    <div style="margin-top:22.4px">
+      <div style="display:flex; align-items:baseline; gap:8.4px; flex-wrap:wrap">
+        <h1 style="font-size:26px; margin:0; letter-spacing:-0.02em">Cape Coral Building Permits</h1>
+        <span class="tag tag-outline" style="align-self:center">Live</span>
+      </div>
+      <p style="margin:8.4px 0 16.8px; font-size:14.5px; line-height:1.55; max-width:640px; color:color-mix(in srgb, var(--color-text) 68%, transparent); text-wrap:pretty">Queried directly against the city's open-data permit service, so what you see here is current. Search by permit number, address, parcel, contractor, company, or anything in the permit description.</p>
+
+      <div style="display:flex; flex-wrap:wrap; gap:8.4px; align-items:center; max-width:760px">
+        <div style="position:relative; display:flex; align-items:center; flex:1; min-width:240px">
+          <svg width="17" height="17" viewBox="0 0 256 256" fill="currentColor" style="position:absolute; left:11px; opacity:0.4; pointer-events:none"><path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"></path></svg>
+          <input class="input" ref="{{ searchRef }}" value="{{ q }}" onChange="{{ onQuery }}" onKeyDown="{{ onKey }}" placeholder="1035 SE 23rd Ave, BLDTR26-004051, re-pipe, Sunshine Plumbing…" style="width:100%; padding:11.2px 11.2px 11.2px 36px; font-size:15px">
+        </div>
+        <button class="btn btn-primary" onClick="{{ onSearch }}" style="padding:11.2px 22.4px; font-size:14.5px">Search</button>
+      </div>
+
+      <div style="display:flex; flex-wrap:wrap; gap:5.6px; align-items:center; margin-top:11.2px; min-height:30px">
+        <button class="btn btn-secondary" onClick="{{ onToggleFilters }}" style="font-size:13px; gap:7px">
+          <svg width="14" height="14" viewBox="0 0 256 256" fill="currentColor"><path d="M40,88H73a32,32,0,0,0,62,0h81a8,8,0,0,0,0-16H135a32,32,0,0,0-62,0H40a8,8,0,0,0,0,16Zm64-24a16,16,0,1,1-16,16A16,16,0,0,1,104,64ZM216,168H199a32,32,0,0,0-62,0H40a8,8,0,0,0,0,16h97a32,32,0,0,0,62,0h17a8,8,0,0,0,0-16Zm-48,24a16,16,0,1,1,16-16A16,16,0,0,1,168,192Z"></path></svg>
+          {{ filtersLabel }}
+        </button>
+        <sc-for list="{{ chips }}" as="c" hint-placeholder-count="0">
+          <button class="tag tag-accent" onClick="{{ c.onRemove }}" style="border:0; cursor:pointer; font-family:var(--font-body); gap:7px">{{ c.label }} <span style="opacity:0.55">✕</span></button>
+        </sc-for>
+        <span style="font-size:12px; color:color-mix(in srgb, var(--color-text) 45%, transparent); margin-left:5.6px">{{ loadLabel }}</span>
+      </div>
+
+      <sc-if value="{{ filtersOpen }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-top:11.2px; padding:16.8px; border-radius:8px; background:var(--color-surface); box-shadow:var(--shadow-sm); display:flex; flex-wrap:wrap; gap:11.2px">
+          <label class="field" style="display:flex; flex-direction:column; gap:4px; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:color-mix(in srgb, var(--color-text) 55%, transparent)">Status
+            <select class="input" value="{{ status }}" onChange="{{ onStatus }}" style="padding:5.6px 8.4px; font-size:13px; text-transform:none; letter-spacing:0; color:var(--color-text)">
+              <option value="">Any status</option>
+              <sc-for list="{{ statuses }}" as="s" hint-placeholder-count="6"><option value="{{ s }}">{{ s }}</option></sc-for>
+            </select>
+          </label>
+          <label class="field" style="display:flex; flex-direction:column; gap:4px; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:color-mix(in srgb, var(--color-text) 55%, transparent)">Permit type
+            <select class="input" value="{{ ptype }}" onChange="{{ onPtype }}" style="padding:5.6px 8.4px; font-size:13px; max-width:300px; text-transform:none; letter-spacing:0; color:var(--color-text)">
+              <option value="">Any permit type</option>
+              <sc-for list="{{ ptypes }}" as="t" hint-placeholder-count="10"><option value="{{ t }}">{{ t }}</option></sc-for>
+            </select>
+          </label>
+          <label class="field" style="display:flex; flex-direction:column; gap:4px; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:color-mix(in srgb, var(--color-text) 55%, transparent)">Year applied
+            <select class="input" value="{{ year }}" onChange="{{ onYear }}" style="padding:5.6px 8.4px; font-size:13px; text-transform:none; letter-spacing:0; color:var(--color-text)">
+              <option value="">Any year</option>
+              <sc-for list="{{ years }}" as="y" hint-placeholder-count="8"><option value="{{ y }}">{{ y }}</option></sc-for>
+            </select>
+          </label>
+        </div>
+      </sc-if>
+    </div>
+
+    <div style="margin-top:22.4px">
+      <div style="font-size:12.5px; color:color-mix(in srgb, var(--color-text) 58%, transparent); margin-bottom:8.4px">{{ countLabel }}</div>
+
+      <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:48px 0; font-size:15px; color:color-mix(in srgb, var(--color-text) 60%, transparent)">Nothing matched that search.</div>
+      </sc-if>
+
+      <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+        <div>
+          <div style="display:grid; grid-template-columns:156px minmax(180px,1fr) 196px 96px 100px 104px; gap:11.2px; padding:0 8.4px 8.4px; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:color-mix(in srgb, var(--color-text) 55%, transparent)">
+            <div>Permit</div><div>Address</div><div>Type</div><div>Status</div><div style="text-align:right">Value</div><div>Applied</div>
+          </div>
+          <sc-for list="{{ rows }}" as="r" hint-placeholder-count="10">
+            <div style="border-top:1px solid var(--color-divider)">
+              <div onClick="{{ r.onToggle }}" style="display:grid; grid-template-columns:156px minmax(180px,1fr) 196px 96px 100px 104px; gap:11.2px; padding:11.2px 8.4px; cursor:pointer; font-size:13.5px; background:{{ r.bg }}">
+                <div style="font-variant-numeric:tabular-nums; color:var(--color-accent-300)">{{ r.permitNumber }}</div>
+                <div>{{ r.address }}</div>
+                <div style="color:color-mix(in srgb, var(--color-text) 78%, transparent)">{{ r.permitType }}</div>
+                <div><span class="tag {{ r.statusTag }}">{{ r.status }}</span></div>
+                <div style="text-align:right; font-variant-numeric:tabular-nums; color:color-mix(in srgb, var(--color-text) 70%, transparent)">{{ r.value }}</div>
+                <div style="font-variant-numeric:tabular-nums; color:color-mix(in srgb, var(--color-text) 65%, transparent)">{{ r.applied }}</div>
+              </div>
+              <sc-if value="{{ r.open }}" hint-placeholder-val="{{ false }}">
+                <div style="padding:5.6px 8.4px 22.4px; display:flex; gap:22.4px; align-items:flex-start">
+                  <div style="flex:1; min-width:0">
+                    <div style="font-size:13.5px; line-height:1.6; max-width:70ch; text-wrap:pretty">{{ r.description }}</div>
+                    <div style="display:grid; grid-template-columns:112px 1fr; gap:5.6px 11.2px; margin-top:11.2px; font-size:12.5px; align-items:baseline">
+                      <div style="color:color-mix(in srgb, var(--color-text) 50%, transparent)">Work class</div><div>{{ r.workClass }}</div>
+                      <div style="color:color-mix(in srgb, var(--color-text) 50%, transparent)">Contractor</div><div>{{ r.contractorLine }}</div>
+                      <div style="color:color-mix(in srgb, var(--color-text) 50%, transparent)">Parcel (STRAP)</div><div style="font-variant-numeric:tabular-nums">{{ r.parcel }}</div>
+                      <div style="color:color-mix(in srgb, var(--color-text) 50%, transparent)">Dates</div><div style="font-variant-numeric:tabular-nums">{{ r.dateLine }}</div>
+                      <div style="color:color-mix(in srgb, var(--color-text) 50%, transparent)">Last inspection</div><div style="font-variant-numeric:tabular-nums">{{ r.lastInsp }}</div>
+                      <div style="color:color-mix(in srgb, var(--color-text) 50%, transparent)">Location</div><div>{{ r.place }}</div>
+                      <div style="color:color-mix(in srgb, var(--color-text) 50%, transparent)">IVR number</div><div style="font-variant-numeric:tabular-nums">{{ r.ivr }}</div>
+                    </div>
+                  </div>
+                  <div style="flex:none; width:148px">
+                    <div style="position:relative; height:104px; border-radius:8px; overflow:hidden; background:var(--color-neutral-900); box-shadow:var(--shadow-sm)">
+                      <div style="position:absolute; inset:0; background:linear-gradient(to right, transparent 32%, color-mix(in srgb, var(--color-text) 9%, transparent) 32%, color-mix(in srgb, var(--color-text) 9%, transparent) 34%, transparent 34%), linear-gradient(to bottom, transparent 58%, color-mix(in srgb, var(--color-text) 9%, transparent) 58%, color-mix(in srgb, var(--color-text) 9%, transparent) 60%, transparent 60%), repeating-linear-gradient(to right, transparent 0 22px, color-mix(in srgb, var(--color-text) 4%, transparent) 22px 23px), repeating-linear-gradient(to bottom, transparent 0 22px, color-mix(in srgb, var(--color-text) 4%, transparent) 22px 23px)"></div>
+                      <div style="position:absolute; left:{{ r.pinX }}; top:{{ r.pinY }}; width:9px; height:9px; margin:-5px 0 0 -5px; border-radius:9px; background:var(--color-accent); box-shadow:0 0 0 4px color-mix(in srgb, var(--color-accent) 28%, transparent)"></div>
+                    </div>
+                    <div style="font-size:11px; margin-top:4px; color:color-mix(in srgb, var(--color-text) 45%, transparent)">Approximate location</div>
+                  </div>
+                </div>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex; flex-direction:column; gap:8.4px">
+          <sc-for list="{{ rows }}" as="r" hint-placeholder-count="8">
+            <div class="card" onClick="{{ r.onToggle }}" style="cursor:pointer; gap:5.6px">
+              <div style="display:flex; justify-content:space-between; gap:8.4px; align-items:baseline">
+                <span style="font-size:12.5px; font-variant-numeric:tabular-nums; color:var(--color-accent-300)">{{ r.permitNumber }}</span>
+                <span class="tag {{ r.statusTag }}">{{ r.status }}</span>
+              </div>
+              <div style="font-family:var(--font-heading); font-weight:500; font-size:16px">{{ r.address }}</div>
+              <div style="font-size:12.5px; color:color-mix(in srgb, var(--color-text) 62%, transparent)">{{ r.permitType }} · {{ r.value }}</div>
+              <div style="font-size:12px; color:color-mix(in srgb, var(--color-text) 48%, transparent)">Applied {{ r.applied }}</div>
+              <sc-if value="{{ r.open }}" hint-placeholder-val="{{ false }}">
+                <div style="margin-top:5.6px; display:flex; flex-direction:column; gap:5.6px">
+                  <div style="font-size:13.5px; line-height:1.6; text-wrap:pretty">{{ r.description }}</div>
+                  <div style="font-size:12.5px; color:color-mix(in srgb, var(--color-text) 60%, transparent)">{{ r.contractorLine }}</div>
+                  <div style="font-size:12.5px; font-variant-numeric:tabular-nums; color:color-mix(in srgb, var(--color-text) 60%, transparent)">{{ r.dateLine }}</div>
+                  <div style="font-size:12.5px; font-variant-numeric:tabular-nums; color:color-mix(in srgb, var(--color-text) 60%, transparent)">Parcel {{ r.parcel }}</div>
+                </div>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ hasMore }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:16.8px 8.4px; border-top:1px solid var(--color-divider)">
+          <button class="btn btn-secondary" onClick="{{ onMore }}" style="font-size:13px">{{ moreLabel }}</button>
+        </div>
+      </sc-if>
+    </div>
+  </div>
+
+  <div style="flex:none; margin-top:56px; padding:16.8px 22.4px 22.4px">
+    <div style="max-width:1120px; margin:0 auto; display:flex; flex-wrap:wrap; gap:11.2px; justify-content:space-between; font-size:11.5px; color:color-mix(in srgb, var(--color-text) 42%, transparent)">
+      <div>{{ footNote }}</div>
+      <div>by Chano</div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{}">
+const SERVICE = "https://capeims.capecoral.gov/arcgis/rest/services/OpenData/OpenData/MapServer/1";
+const OUT = ["objectid","Permit_Number","permit_status","applydate","issuedate","finalizedate","last_insp_date","expiredate","permitvalue","permit_desc","Permit_Type","Work_Class","Parcel","Addr1","Predir","Addr2","Street_Type","Post_Dir","Unit","City","Zip","Company_Name","Contractor","Contract_Type","IVR_Number"].join(",");
+const TEXT_FIELDS = ["Permit_Number","Addr1","Addr2","Predir","Street_Type","Post_Dir","Parcel","permit_desc","Company_Name","Contractor","Permit_Type","Work_Class","Zip"];
+const MONTH = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const PAGE = 25;
+
+function q(params) {
+  return SERVICE + "/query?" + Object.keys(params).map(k => k + "=" + encodeURIComponent(params[k])).join("&");
+}
+function esc(s) { return String(s).replace(/'/g, "''"); }
+function fmtDate(ms) {
+  if (!ms) return "";
+  const d = new Date(ms);
+  return MONTH[d.getMonth()] + " " + String(d.getDate()).padStart(2, "0") + ", " + d.getFullYear();
+}
+function money(v) {
+  const n = Number(v);
+  if (!n) return "—";
+  return "$" + n.toLocaleString();
+}
+function tagFor(s) {
+  const v = String(s).toLowerCase();
+  if (v.indexOf("issued") === 0 || v.indexOf("active") === 0 || v.indexOf("submit") === 0) return "tag-accent";
+  if (v.indexOf("void") === 0 || v.indexOf("denied") === 0 || v.indexOf("expired") === 0 || v.indexOf("reject") === 0) return "tag-outline";
+  return "tag-neutral";
+}
+function pct(str, lo, span) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
+  return (lo + (h % span)) + "%";
+}
+function addressOf(a) {
+  return [a.Addr1, a.Predir, a.Addr2, a.Street_Type, a.Post_Dir, a.Unit]
+    .filter(v => v && String(v).trim() && String(v).toLowerCase() !== "parcel")
+    .join(" ").replace(/\s+/g, " ").trim() || "No site address on record";
+}
+
+class Component extends DCLogic {
+  state = {
+    q: "", aq: "", status: "", ptype: "", year: "",
+    filtersOpen: false, openId: null, wide: true,
+    rows: [], total: null, loading: true, error: "", statuses: [], ptypes: []
+  };
+
+  constructor(props) {
+    super(props);
+    this.searchRef = React.createRef();
+    this.token = 0;
+  }
+
+  componentDidMount() {
+    this._resize = () => {
+      const wide = window.innerWidth >= 1040;
+      if (wide !== this.state.wide) this.setState({ wide });
+    };
+    this._resize();
+    window.addEventListener("resize", this._resize);
+    this._key = e => { if (e.key === "Escape") this.setState({ openId: null }); };
+    window.addEventListener("keydown", this._key);
+
+    this.loadDistinct("permit_status", "statuses");
+    this.loadDistinct("Permit_Type", "ptypes");
+    this.run(true);
+  }
+  componentWillUnmount() {
+    window.removeEventListener("resize", this._resize);
+    window.removeEventListener("keydown", this._key);
+  }
+
+  loadDistinct(field, key) {
+    fetch(q({ where: field + " IS NOT NULL", outFields: field, returnDistinctValues: "true", orderByFields: field, f: "json" }))
+      .then(r => r.json())
+      .then(j => {
+        const vals = (j.features || []).map(f => f.attributes[field]).filter(v => v && String(v).trim());
+        this.setState({ [key]: vals });
+      }).catch(() => {});
+  }
+
+  where() {
+    const st = this.state;
+    const clauses = [];
+    const terms = st.aq.trim().split(/\s+/).filter(Boolean);
+    terms.forEach(t => {
+      const v = esc(t.toUpperCase());
+      clauses.push("(" + TEXT_FIELDS.map(f => "UPPER(" + f + ") LIKE '%" + v + "%'").join(" OR ") + ")");
+    });
+    if (st.status) clauses.push("permit_status = '" + esc(st.status) + "'");
+    if (st.ptype) clauses.push("Permit_Type = '" + esc(st.ptype) + "'");
+    if (st.year) clauses.push("applydate >= date '" + st.year + "-01-01' AND applydate < date '" + (+st.year + 1) + "-01-01'");
+    return clauses.length ? clauses.join(" AND ") : "1=1";
+  }
+
+  run(reset) {
+    const my = ++this.token;
+    const offset = reset ? 0 : this.state.rows.length;
+    const where = this.where();
+    this.setState({ loading: true, error: "", openId: reset ? null : this.state.openId });
+
+    if (reset) {
+      fetch(q({ where, returnCountOnly: "true", f: "json" }))
+        .then(r => r.json())
+        .then(j => { if (my === this.token) this.setState({ total: typeof j.count === "number" ? j.count : null }); })
+        .catch(() => {});
+    }
+
+    fetch(q({ where, outFields: OUT, orderByFields: "applydate DESC", resultOffset: offset, resultRecordCount: PAGE, returnGeometry: "false", f: "json" }))
+      .then(r => r.json())
+      .then(j => {
+        if (my !== this.token) return;
+        if (j.error) throw new Error(j.error.message || "service error");
+        const recs = (j.features || []).map(f => {
+          const a = f.attributes;
+          const parcel = (a.Parcel || "").trim();
+          const co = (a.Company_Name || "").trim();
+          const person = (a.Contractor || "").trim();
+          return {
+            id: a.objectid,
+            permitNumber: a.Permit_Number || "—",
+            status: a.permit_status || "—",
+            statusTag: tagFor(a.permit_status),
+            address: addressOf(a),
+            permitType: a.Permit_Type || "—",
+            workClass: a.Work_Class || "—",
+            description: (a.permit_desc || "").trim() || "No description on record.",
+            value: money(a.permitvalue),
+            applied: fmtDate(a.applydate),
+            parcel: parcel || "—",
+            place: [a.City, a.Zip].filter(Boolean).join(" ") || "—",
+            ivr: a.IVR_Number || "—",
+            lastInsp: fmtDate(a.last_insp_date) || "None recorded",
+            contractorLine: [co, person, (a.Contract_Type || "").trim()].filter(Boolean).join(" · ") || "None on record",
+            dateLine: [
+              "Applied " + (fmtDate(a.applydate) || "—"),
+              a.issuedate ? "issued " + fmtDate(a.issuedate) : "",
+              a.finalizedate ? "finalized " + fmtDate(a.finalizedate) : "",
+              a.expiredate ? "expires " + fmtDate(a.expiredate) : ""
+            ].filter(Boolean).join(" · "),
+            pinX: pct(parcel + a.Permit_Number, 22, 56),
+            pinY: pct(a.Permit_Number + parcel, 20, 60)
+          };
+        });
+        this.setState(s => ({ rows: reset ? recs : s.rows.concat(recs), loading: false }));
+      })
+      .catch(e => { if (my === this.token) this.setState({ loading: false, error: String(e.message || e) }); });
+  }
+
+  set(k) { return e => this.setState({ [k]: e.target.value }, () => this.run(true)); }
+
+  renderVals() {
+    const st = this.state;
+    const chips = [];
+    const chip = (k, label) => { if (st[k]) chips.push({ label, onRemove: () => this.setState({ [k]: "" }, () => this.run(true)) }); };
+    chip("status", st.status);
+    chip("ptype", st.ptype);
+    chip("year", "Applied " + st.year);
+
+    const years = [];
+    for (let y = 2026; y >= 2006; y--) years.push(String(y));
+
+    const rows = st.rows.map(r => Object.assign({}, r, {
+      open: st.openId === r.id,
+      bg: st.openId === r.id ? "color-mix(in srgb, var(--color-accent) 10%, transparent)" : "transparent",
+      onToggle: () => this.setState(s => ({ openId: s.openId === r.id ? null : r.id }))
+    }));
+
+    const searching = !!(st.aq || st.status || st.ptype || st.year);
+    const total = st.total;
+    return {
+      q: st.q, status: st.status, ptype: st.ptype, year: st.year,
+      statuses: st.statuses, ptypes: st.ptypes, years,
+      searchRef: this.searchRef,
+      filtersOpen: st.filtersOpen,
+      filtersLabel: chips.length ? "Filters · " + chips.length : "Filters",
+      loadLabel: st.error ? "Permit service error: " + st.error : (st.loading ? "Querying the permit service…" : ""),
+      footNote: "Live query against the City of Cape Coral open-data permit service. Records update as the city posts them.",
+      chips, rows,
+      isEmpty: !st.loading && !st.error && st.rows.length === 0,
+      isDesktop: st.wide && rows.length > 0,
+      isPhone: !st.wide && rows.length > 0,
+      countLabel: st.error ? "" : (total === null ? "" :
+        (searching
+          ? (total === 1 ? "1 permit" : total.toLocaleString() + " permits") + " · showing " + rows.length
+          : "Most recent permits citywide · showing " + rows.length + " of " + total.toLocaleString())),
+      hasMore: total !== null && rows.length > 0 && rows.length < total,
+      moreLabel: st.loading ? "Loading…" : "Show " + PAGE + " more",
+      onMore: () => this.run(false),
+      onQuery: e => this.setState({ q: e.target.value }),
+      onKey: e => { if (e.key === "Enter") this.setState(s => ({ aq: s.q }), () => this.run(true)); },
+      onSearch: () => this.setState(s => ({ aq: s.q }), () => this.run(true)),
+      onToggleFilters: () => this.setState(s => ({ filtersOpen: !s.filtersOpen })),
+      onStatus: this.set("status"), onPtype: this.set("ptype"), onYear: this.set("year")
+    };
+  }
+}
+</script>
+</body>
+</html>

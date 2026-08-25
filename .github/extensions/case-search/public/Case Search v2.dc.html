@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/nocturne-5223f3d0-36d8-45ce-9356-2ac9c8ce1793/styles.css">
+<script src="_ds/nocturne-5223f3d0-36d8-45ce-9356-2ac9c8ce1793/_ds_bundle.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap">
+<style>
+  body { margin: 0; background: #161826; }
+  a { color: var(--color-accent); text-decoration: none; }
+  a:hover { color: var(--color-accent-400); text-decoration: underline; }
+</style>
+</helmet>
+<div style="min-height:100vh; display:flex; flex-direction:column; background:var(--color-bg); color:var(--color-text); font-family:var(--font-body); font-size:14px">
+
+  <div style="flex:1; width:100%; max-width:1120px; margin:0 auto; padding:0 22.4px; box-sizing:border-box">
+
+    <div style="display:flex; flex-wrap:wrap; gap:16.8px; padding:16.8px 0 0; font-size:12.5px">
+      <span style="color:var(--color-accent-300)">Code enforcement cases</span>
+      <a href="Officers.dc.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Officers</a>
+      <a href="Planning Projects.dc.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Planning projects</a>
+      <a href="Contractors.dc.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Contractors</a>
+      <a href="Building Permits.dc.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Building permits</a>
+      <a href="Inspections.dc.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Inspections</a>
+      <a href="Parcel Map.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Parcel map</a>
+      <a href="Public Works.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Public works</a>
+      <a href="City Salaries.dc.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Salaries</a>
+    </div>
+
+    <div style="margin-top:{{ heroTop }}; transition:margin-top 220ms ease">
+      <div style="display:flex; align-items:baseline; gap:8.4px; flex-wrap:wrap">
+        <h1 style="font-size:26px; margin:0; letter-spacing:-0.02em">Cape Coral Code Enforcement Case Search</h1>
+        <span class="tag tag-outline" style="align-self:center">Live</span>
+      </div>
+      <p style="margin:8.4px 0 16.8px; font-size:14.5px; line-height:1.55; max-width:640px; color:color-mix(in srgb, var(--color-text) 68%, transparent); text-wrap:pretty">Look up the code enforcement history of any property in the city — {{ totalLabel }} cases, queried live from the city's own file. Start typing an address, owner, case number, or parcel and matches will come up as you go.</p>
+
+      <div style="display:flex; flex-wrap:wrap; gap:8.4px; align-items:flex-start; max-width:760px">
+        <div style="position:relative; flex:1; min-width:240px">
+          <div style="position:relative; display:flex; align-items:center">
+            <svg width="17" height="17" viewBox="0 0 256 256" fill="currentColor" style="position:absolute; left:11px; opacity:0.4; pointer-events:none"><path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"></path></svg>
+            <input class="input" ref="{{ searchRef }}" value="{{ q }}" onChange="{{ onQuery }}" onKeyDown="{{ onKey }}" onBlur="{{ onBlur }}" autoComplete="off" placeholder="4934 SW 20th Pl, Zubek, CODE22-017213, 164523C1046410330…" style="width:100%; padding:11.2px 11.2px 11.2px 36px; font-size:15px">
+          </div>
+          <sc-if value="{{ sugOpen }}" hint-placeholder-val="{{ false }}">
+            <div style="position:absolute; z-index:20; left:0; right:0; top:calc(100% + 4px); border-radius:8px; overflow:hidden; background:var(--color-surface); box-shadow:var(--shadow-md)">
+              <sc-for list="{{ suggestions }}" as="s" hint-placeholder-count="4">
+                <div onMouseDown="{{ s.onPick }}" style="display:flex; gap:8.4px; align-items:baseline; padding:8.4px 11.2px; cursor:pointer; background:{{ s.bg }}">
+                  <span style="flex:1; min-width:0; font-size:13.5px">{{ s.primary }}</span>
+                  <span style="font-size:11.5px; font-variant-numeric:tabular-nums; color:color-mix(in srgb, var(--color-text) 50%, transparent)">{{ s.secondary }}</span>
+                </div>
+              </sc-for>
+              <sc-if value="{{ sugEmpty }}" hint-placeholder-val="{{ false }}">
+                <div style="padding:8.4px 11.2px; font-size:13px; color:color-mix(in srgb, var(--color-text) 45%, transparent)">{{ sugEmptyLabel }}</div>
+              </sc-if>
+            </div>
+          </sc-if>
+        </div>
+        <button class="btn btn-primary" onClick="{{ onSearch }}" style="padding:11.2px 22.4px; font-size:14.5px">Search</button>
+      </div>
+
+      <div style="display:flex; flex-wrap:wrap; gap:5.6px; align-items:center; margin-top:11.2px; min-height:30px">
+        <button class="btn btn-secondary" onClick="{{ onToggleFilters }}" style="font-size:13px; gap:7px">
+          <svg width="14" height="14" viewBox="0 0 256 256" fill="currentColor"><path d="M40,88H73a32,32,0,0,0,62,0h81a8,8,0,0,0,0-16H135a32,32,0,0,0-62,0H40a8,8,0,0,0,0,16Zm64-24a16,16,0,1,1-16,16A16,16,0,0,1,104,64ZM216,168H199a32,32,0,0,0-62,0H40a8,8,0,0,0,0,16h97a32,32,0,0,0,62,0h17a8,8,0,0,0,0-16Zm-48,24a16,16,0,1,1,16-16A16,16,0,0,1,168,192Z"></path></svg>
+          {{ filtersLabel }}
+        </button>
+        <sc-for list="{{ chips }}" as="c" hint-placeholder-count="0">
+          <button class="tag tag-accent" onClick="{{ c.onRemove }}" style="border:0; cursor:pointer; font-family:var(--font-body); gap:7px">{{ c.label }} <span style="opacity:0.55">✕</span></button>
+        </sc-for>
+        <span style="font-size:12px; color:color-mix(in srgb, var(--color-text) 45%, transparent); margin-left:5.6px">{{ loadLabel }}</span>
+      </div>
+
+      <sc-if value="{{ filtersOpen }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-top:11.2px; padding:16.8px; border-radius:8px; background:var(--color-surface); box-shadow:var(--shadow-sm); display:flex; flex-wrap:wrap; gap:11.2px">
+          <label class="field" style="display:flex; flex-direction:column; gap:4px; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:color-mix(in srgb, var(--color-text) 55%, transparent)">Year opened
+            <select class="input" value="{{ year }}" onChange="{{ onYear }}" style="padding:5.6px 8.4px; font-size:13px; text-transform:none; letter-spacing:0; color:var(--color-text)">
+              <option value="">Any year</option>
+              <sc-for list="{{ years }}" as="y" hint-placeholder-count="8"><option value="{{ y }}">{{ y }}</option></sc-for>
+            </select>
+          </label>
+          <label class="field" style="display:flex; flex-direction:column; gap:4px; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:color-mix(in srgb, var(--color-text) 55%, transparent)">Status
+            <select class="input" value="{{ status }}" onChange="{{ onStatus }}" style="padding:5.6px 8.4px; font-size:13px; max-width:260px; text-transform:none; letter-spacing:0; color:var(--color-text)">
+              <option value="">Any status</option>
+              <sc-for list="{{ statuses }}" as="s" hint-placeholder-count="6"><option value="{{ s }}">{{ s }}</option></sc-for>
+            </select>
+          </label>
+          <label class="field" style="display:flex; flex-direction:column; gap:4px; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:color-mix(in srgb, var(--color-text) 55%, transparent)">Case type
+            <select class="input" value="{{ type }}" onChange="{{ onType }}" style="padding:5.6px 8.4px; font-size:13px; max-width:260px; text-transform:none; letter-spacing:0; color:var(--color-text)">
+              <option value="">Any case type</option>
+              <sc-for list="{{ types }}" as="t" hint-placeholder-count="8"><option value="{{ t }}">{{ t }}</option></sc-for>
+            </select>
+          </label>
+          <label class="field" style="display:flex; flex-direction:column; gap:4px; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:color-mix(in srgb, var(--color-text) 55%, transparent)">Updated by
+            <select class="input" value="{{ officer }}" onChange="{{ onOfficer }}" style="padding:5.6px 8.4px; font-size:13px; max-width:260px; text-transform:none; letter-spacing:0; color:var(--color-text)">
+              <option value="">Anyone</option>
+              <sc-for list="{{ officers }}" as="o" hint-placeholder-count="8"><option value="{{ o.v }}">{{ o.label }}</option></sc-for>
+            </select>
+          </label>
+          <label class="field" style="display:flex; flex-direction:column; gap:4px; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:color-mix(in srgb, var(--color-text) 55%, transparent)">Who reported it
+            <select class="input" value="{{ origin }}" onChange="{{ onOrigin }}" style="padding:5.6px 8.4px; font-size:13px; text-transform:none; letter-spacing:0; color:var(--color-text)">
+              <option value="">Anyone</option>
+              <option value="named">Named complainant</option>
+              <option value="anon">Anonymous</option>
+              <option value="neighbor">Neighbor</option>
+            </select>
+          </label>
+          <label class="field" style="display:flex; flex-direction:column; gap:4px; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:color-mix(in srgb, var(--color-text) 55%, transparent)">Owner name
+            <div style="display:flex; gap:5.6px">
+              <input class="input" value="{{ ownerDraft }}" onChange="{{ onOwnerDraft }}" onKeyDown="{{ onOwnerKey }}" placeholder="First and last, any order" style="padding:5.6px 8.4px; font-size:13px; width:196px; text-transform:none; letter-spacing:0; color:var(--color-text)">
+              <button class="btn btn-secondary" onClick="{{ onOwnerApply }}" style="font-size:12.5px">Apply</button>
+            </div>
+          </label>
+          <label class="field" style="display:flex; flex-direction:column; gap:4px; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:color-mix(in srgb, var(--color-text) 55%, transparent)">Enforcement zone
+            <select class="input" value="{{ zone }}" onChange="{{ onZone }}" style="padding:5.6px 8.4px; font-size:13px; text-transform:none; letter-spacing:0; color:var(--color-text)">
+              <option value="">Any zone</option>
+              <sc-for list="{{ zoneOptions }}" as="z" hint-placeholder-count="8"><option value="{{ z.v }}">{{ z.label }}</option></sc-for>
+            </select>
+          </label>
+        </div>
+      </sc-if>
+    </div>
+
+    <sc-if value="{{ showRecent }}" hint-placeholder-val="{{ false }}">
+      <div style="margin-top:33.6px; max-width:760px">
+        <div style="display:flex; align-items:baseline; gap:8.4px; margin-bottom:8.4px">
+          <div style="font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:color-mix(in srgb, var(--color-text) 55%, transparent)">Recently opened citywide</div>
+        </div>
+        <sc-for list="{{ recent }}" as="r" hint-placeholder-count="8">
+          <div onClick="{{ r.onOpen }}" style="border-top:1px solid var(--color-divider); display:grid; grid-template-columns:minmax(150px,1fr) minmax(180px,1fr) 152px 104px; gap:11.2px; align-items:baseline; padding:9px 4px; cursor:pointer; font-size:13.5px">
+            <div>{{ r.address }}</div>
+            <div style="color:color-mix(in srgb, var(--color-text) 62%, transparent); font-size:12.5px">{{ r.type }}</div>
+            <div><span class="tag {{ r.statusTag }}" style="white-space:nowrap">{{ r.status }}</span></div>
+            <div style="text-align:right; font-variant-numeric:tabular-nums; font-size:12.5px; color:color-mix(in srgb, var(--color-text) 50%, transparent)">{{ r.opened }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ showOwnerProps }}" hint-placeholder-val="{{ false }}">
+      <div style="margin-top:22.4px; padding:16.8px; border-radius:8px; background:var(--color-surface); box-shadow:var(--shadow-sm)">
+        <div style="display:flex; flex-wrap:wrap; align-items:baseline; gap:8.4px; margin-bottom:8.4px">
+          <div style="font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--color-accent)">Every property this owner holds</div>
+          <div style="font-size:11.5px; color:color-mix(in srgb, var(--color-text) 45%, transparent)">{{ ownerPropsLabel }}</div>
+        </div>
+        <sc-for list="{{ ownerProps }}" as="p" hint-placeholder-count="4">
+          <div onClick="{{ p.onPick }}" style="border-top:1px solid var(--color-divider); display:grid; grid-template-columns:minmax(160px,1fr) minmax(150px,1fr) 84px 112px; gap:11.2px; align-items:baseline; padding:7px 0; cursor:pointer; font-size:13px">
+            <div>{{ p.address }}</div>
+            <div style="font-size:12px; color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ p.owner }}</div>
+            <div style="font-size:12px; color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ p.zoning }}</div>
+            <div style="text-align:right; font-variant-numeric:tabular-nums; font-size:12px; color:color-mix(in srgb, var(--color-text) 70%, transparent)">{{ p.assessed }}</div>
+          </div>
+        </sc-for>
+        <div style="margin-top:8.4px; font-size:11.5px; color:color-mix(in srgb, var(--color-text) 42%, transparent)">From the tax roll — these are all parcels in this owner's name, whether or not they have code cases. Click one to see its cases.</div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ searched }}" hint-placeholder-val="{{ false }}">
+      <div style="margin-top:22.4px">
+        <div style="font-size:12.5px; color:color-mix(in srgb, var(--color-text) 58%, transparent); margin-bottom:8.4px">{{ countLabel }}</div>
+
+        <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:48px 0; font-size:15px; color:color-mix(in srgb, var(--color-text) 60%, transparent)">Nothing matched that search.</div>
+        </sc-if>
+
+        <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+          <div>
+            <div style="display:grid; grid-template-columns:132px minmax(150px,1fr) 132px 120px 128px 96px 96px 44px; gap:11.2px; padding:0 8.4px 8.4px; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:color-mix(in srgb, var(--color-text) 55%, transparent)">
+              <div>Case number</div><div>Address</div><div>Owner</div><div>Case type</div><div>Updated by</div><div>Opened</div><div>Updated</div><div>Zone</div>
+            </div>
+            <sc-for list="{{ rows }}" as="r" hint-placeholder-count="10">
+              <div style="border-top:1px solid var(--color-divider)">
+                <div onClick="{{ r.onToggle }}" style="display:grid; grid-template-columns:132px minmax(150px,1fr) 132px 120px 128px 96px 96px 44px; gap:11.2px; padding:11.2px 8.4px; cursor:pointer; font-size:13.5px; background:{{ r.bg }}">
+                  <div style="font-variant-numeric:tabular-nums; color:var(--color-accent-300)">{{ r.caseNo }}</div>
+                  <div>{{ r.address }}</div>
+                  <div style="color:color-mix(in srgb, var(--color-text) 78%, transparent)">{{ r.owner }}</div>
+                  <div style="color:color-mix(in srgb, var(--color-text) 78%, transparent)">{{ r.type }}</div>
+                  <div style="color:color-mix(in srgb, var(--color-text) 78%, transparent)">{{ r.officer }}</div>
+                  <div style="font-variant-numeric:tabular-nums; color:color-mix(in srgb, var(--color-text) 62%, transparent)">{{ r.openedShort }}</div>
+                  <div style="font-variant-numeric:tabular-nums; color:color-mix(in srgb, var(--color-text) 62%, transparent)">{{ r.updatedShort }}</div>
+                  <div style="color:var(--color-accent-300)">{{ r.zone }}</div>
+                </div>
+                <sc-if value="{{ r.open }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex; gap:22.4px; padding:5.6px 8.4px 22.4px; align-items:flex-start">
+                    <div style="flex:1; min-width:0">
+                      <div style="display:flex; gap:8.4px; align-items:center; margin-bottom:8.4px; flex-wrap:wrap">
+                        <span class="tag {{ r.statusTag }}">{{ r.status }}</span>
+                        <span style="font-size:12px; color:color-mix(in srgb, var(--color-text) 52%, transparent)">{{ r.dateLine }}</span>
+                      </div>
+                      <div style="font-size:13.5px; line-height:1.6; max-width:70ch; text-wrap:pretty">{{ r.description }}</div>
+                      <div style="display:grid; grid-template-columns:112px 1fr; gap:5.6px 11.2px; margin-top:11.2px; font-size:12.5px; align-items:baseline">
+                        <div style="color:color-mix(in srgb, var(--color-text) 50%, transparent)">Case type</div><div>{{ r.typeLine }}</div>
+                        <div style="color:color-mix(in srgb, var(--color-text) 50%, transparent)">How it started</div><div><span class="tag {{ r.originTag }}" style="white-space:nowrap">{{ r.origin }}</span></div>
+                        <div style="color:color-mix(in srgb, var(--color-text) 50%, transparent)">Reported by</div><div><span class="tag {{ r.reporterTag }}" style="white-space:nowrap">{{ r.reporter }}</span></div>
+                        <div style="color:color-mix(in srgb, var(--color-text) 50%, transparent)">Owner</div><div>{{ r.ownerFull }}</div>
+                        <div style="color:color-mix(in srgb, var(--color-text) 50%, transparent)">Mailing</div><div>{{ r.mailing }}</div>
+                        <div style="color:color-mix(in srgb, var(--color-text) 50%, transparent)">Parcel (STRAP)</div><div style="font-variant-numeric:tabular-nums">{{ r.strap }}</div>
+                        <div style="color:color-mix(in srgb, var(--color-text) 50%, transparent)">Legal</div><div>{{ r.legal }}</div>
+                        <div style="color:color-mix(in srgb, var(--color-text) 50%, transparent)">Assigned to</div><div>{{ r.assigned }}</div>
+                        <div style="color:color-mix(in srgb, var(--color-text) 50%, transparent)">Zoning / land use</div><div>{{ r.landUse }}</div>
+                        <div style="color:color-mix(in srgb, var(--color-text) 50%, transparent)">Updated by</div><div>{{ r.officerLine }}</div>
+                      </div>
+                      <div style="margin-top:16.8px; display:flex; align-items:baseline; gap:8.4px">
+                        <div style="font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--color-accent)">Utility liens</div>
+                        <div style="font-size:11.5px; color:color-mix(in srgb, var(--color-text) 45%, transparent)">{{ r.lienLabel }}</div>
+                      </div>
+                      <sc-for list="{{ r.liens }}" as="l" hint-placeholder-count="0">
+                        <div style="border-top:1px solid var(--color-divider); display:grid; grid-template-columns:minmax(120px,1fr) 116px 104px 92px; gap:11.2px; align-items:baseline; padding:5.6px 0; font-size:12.5px">
+                          <div>{{ l.who }}</div>
+                          <div style="font-variant-numeric:tabular-nums; color:color-mix(in srgb, var(--color-text) 60%, transparent)">{{ l.number }}</div>
+                          <div style="font-variant-numeric:tabular-nums; text-align:right">{{ l.amount }}</div>
+                          <div style="font-variant-numeric:tabular-nums; text-align:right; color:color-mix(in srgb, var(--color-text) 50%, transparent)">{{ l.dated }}</div>
+                        </div>
+                      </sc-for>
+
+                      <div style="margin-top:16.8px; display:flex; align-items:baseline; gap:8.4px">
+                        <div style="font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--color-accent)">311 complaints at this address</div>
+                        <div style="font-size:11.5px; color:color-mix(in srgb, var(--color-text) 45%, transparent)">{{ r.complaintLabel }}</div>
+                      </div>
+                      <sc-for list="{{ r.complaints }}" as="c" hint-placeholder-count="0">
+                        <div style="border-top:1px solid var(--color-divider); display:grid; grid-template-columns:minmax(140px,1fr) 156px 128px 92px; gap:11.2px; align-items:baseline; padding:5.6px 0; font-size:12.5px">
+                          <div>{{ c.title }}</div>
+                          <div style="color:color-mix(in srgb, var(--color-text) 60%, transparent)">{{ c.category }}</div>
+                          <div style="color:color-mix(in srgb, var(--color-text) 60%, transparent)">{{ c.status }}</div>
+                          <div style="font-variant-numeric:tabular-nums; text-align:right; color:color-mix(in srgb, var(--color-text) 50%, transparent)">{{ c.created }}</div>
+                        </div>
+                      </sc-for>
+
+                      <div style="display:flex; flex-wrap:wrap; gap:5.6px; margin-top:16.8px">
+                        <button class="btn btn-ghost" onClick="{{ r.onAddress }}" style="font-size:12.5px">All cases at this address</button>
+                        <button class="btn btn-ghost" onClick="{{ r.onOfficer }}" style="font-size:12.5px">All cases by {{ r.officer }}</button>
+                      </div>
+                    </div>
+                    <div style="flex:none; width:148px">
+                      <div style="position:relative; height:104px; border-radius:8px; overflow:hidden; background:var(--color-neutral-900); box-shadow:var(--shadow-sm)">
+                        <div style="position:absolute; inset:0; background:linear-gradient(to right, transparent 32%, color-mix(in srgb, var(--color-text) 9%, transparent) 32%, color-mix(in srgb, var(--color-text) 9%, transparent) 34%, transparent 34%), linear-gradient(to bottom, transparent 58%, color-mix(in srgb, var(--color-text) 9%, transparent) 58%, color-mix(in srgb, var(--color-text) 9%, transparent) 60%, transparent 60%), repeating-linear-gradient(to right, transparent 0 22px, color-mix(in srgb, var(--color-text) 4%, transparent) 22px 23px), repeating-linear-gradient(to bottom, transparent 0 22px, color-mix(in srgb, var(--color-text) 4%, transparent) 22px 23px)"></div>
+                        <div style="position:absolute; left:{{ r.pinX }}; top:{{ r.pinY }}; width:9px; height:9px; margin:-5px 0 0 -5px; border-radius:9px; background:var(--color-accent); box-shadow:0 0 0 4px color-mix(in srgb, var(--color-accent) 28%, transparent)"></div>
+                      </div>
+                      <div style="font-size:11px; margin-top:4px; color:color-mix(in srgb, var(--color-text) 45%, transparent)">Approximate location</div>
+                    </div>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex; flex-direction:column; gap:8.4px">
+            <sc-for list="{{ rows }}" as="r" hint-placeholder-count="8">
+              <div class="card" onClick="{{ r.onToggle }}" style="cursor:pointer; gap:5.6px">
+                <div style="display:flex; justify-content:space-between; gap:8.4px; align-items:baseline">
+                  <span style="font-size:12.5px; font-variant-numeric:tabular-nums; color:var(--color-accent-300)">{{ r.caseNo }}</span>
+                  <span class="tag {{ r.statusTag }}">{{ r.status }}</span>
+                </div>
+                <div style="font-family:var(--font-heading); font-weight:500; font-size:16px">{{ r.address }}</div>
+                <div style="font-size:12.5px; color:color-mix(in srgb, var(--color-text) 62%, transparent)">{{ r.typeLine }} · {{ r.owner }}</div>
+                <div style="font-size:12px; color:color-mix(in srgb, var(--color-text) 48%, transparent)">{{ r.dateLine }}</div>
+                <sc-if value="{{ r.open }}" hint-placeholder-val="{{ false }}">
+                  <div style="margin-top:5.6px; display:flex; flex-direction:column; gap:8.4px">
+                    <div style="font-size:13.5px; line-height:1.6; text-wrap:pretty">{{ r.description }}</div>
+                    <div style="display:flex; flex-wrap:wrap; gap:5.6px">
+                      <span class="tag {{ r.originTag }}" style="white-space:nowrap">{{ r.origin }}</span>
+                      <span class="tag {{ r.reporterTag }}" style="white-space:nowrap">{{ r.reporter }}</span>
+                    </div>
+                    <div style="display:grid; grid-template-columns:96px 1fr; gap:4px 8.4px; font-size:12.5px; align-items:baseline">
+                      <div style="color:color-mix(in srgb, var(--color-text) 50%, transparent)">Assigned to</div><div>{{ r.assigned }}</div>
+                      <div style="color:color-mix(in srgb, var(--color-text) 50%, transparent)">Updated by</div><div>{{ r.officerLine }}</div>
+                      <div style="color:color-mix(in srgb, var(--color-text) 50%, transparent)">Zoning</div><div>{{ r.landUse }}</div>
+                      <div style="color:color-mix(in srgb, var(--color-text) 50%, transparent)">Owner</div><div>{{ r.ownerFull }}</div>
+                      <div style="color:color-mix(in srgb, var(--color-text) 50%, transparent)">Mailing</div><div>{{ r.mailing }}</div>
+                      <div style="color:color-mix(in srgb, var(--color-text) 50%, transparent)">Parcel</div><div style="font-variant-numeric:tabular-nums">{{ r.strap }}</div>
+                      <div style="color:color-mix(in srgb, var(--color-text) 50%, transparent)">Legal</div><div>{{ r.legal }}</div>
+                    </div>
+
+                    <div style="display:flex; align-items:baseline; gap:8.4px; margin-top:5.6px">
+                      <div style="font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--color-accent)">Utility liens</div>
+                      <div style="font-size:11px; color:color-mix(in srgb, var(--color-text) 45%, transparent)">{{ r.lienLabel }}</div>
+                    </div>
+                    <sc-for list="{{ r.liens }}" as="l" hint-placeholder-count="0">
+                      <div style="border-top:1px solid var(--color-divider); padding:5.6px 0; font-size:12.5px">
+                        <div>{{ l.who }}</div>
+                        <div style="font-variant-numeric:tabular-nums; color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ l.amount }} · {{ l.dated }} · {{ l.number }}</div>
+                      </div>
+                    </sc-for>
+
+                    <div style="display:flex; align-items:baseline; gap:8.4px; margin-top:5.6px">
+                      <div style="font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--color-accent)">311 complaints here</div>
+                      <div style="font-size:11px; color:color-mix(in srgb, var(--color-text) 45%, transparent)">{{ r.complaintLabel }}</div>
+                    </div>
+                    <sc-for list="{{ r.complaints }}" as="c" hint-placeholder-count="0">
+                      <div style="border-top:1px solid var(--color-divider); padding:5.6px 0; font-size:12.5px">
+                        <div>{{ c.title }}</div>
+                        <div style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ c.category }} · {{ c.status }} · {{ c.created }}</div>
+                      </div>
+                    </sc-for>
+
+                    <div style="display:flex; flex-wrap:wrap; gap:5.6px; margin-top:5.6px">
+                      <button class="btn btn-ghost" onClick="{{ r.onAddress }}" style="font-size:12.5px">All cases at this address</button>
+                      <button class="btn btn-ghost" onClick="{{ r.onOfficer }}" style="font-size:12.5px">All cases by {{ r.officer }}</button>
+                    </div>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ hasMore }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:16.8px 8.4px; border-top:1px solid var(--color-divider)">
+            <button class="btn btn-secondary" onClick="{{ onMore }}" style="font-size:13px">{{ moreLabel }}</button>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+  </div>
+
+  <div style="flex:none; margin-top:56px; padding:16.8px 22.4px 22.4px">
+    <div style="max-width:1120px; margin:0 auto; display:flex; flex-wrap:wrap; gap:11.2px; justify-content:space-between; font-size:11.5px; color:color-mix(in srgb, var(--color-text) 42%, transparent)">
+      <div>Live query against the City of Cape Coral open-data code enforcement file. Zones come from the city's enforcement-zone assignments.</div>
+      <div>by Chano</div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{}">
+const SERVICE = "https://capeims.capecoral.gov/arcgis/rest/services/OpenData/OpenData/MapServer/5";
+const OUT = "ESRI_OID,CaseNumber,Status,opened,closed,updated,UpdatedBy,case_description,CaseType,CaseSubtype,SiteAddressGIS,STRAPGIS,OwnerGIS,OwnerOtherGIS,MailingAddr1GIS,MailingCityGIS,MailingStateGIS,MailingZipGIS,legaldescription,Main_Site_Zip";
+const TEXT_FIELDS = ["CaseNumber","SiteAddressGIS","OwnerGIS","OwnerOtherGIS","UpdatedBy","case_description","CaseType","CaseSubtype","STRAPGIS","Main_Site_Zip"];
+const MONTH = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const PAGE = 25;
+const SUFFIX = { avenue:"AVE", av:"AVE", drive:"DR", court:"CT", street:"ST", road:"RD", boulevard:"BLVD", lane:"LN", place:"PL", terrace:"TER", circle:"CIR", parkway:"PKWY", trail:"TRL", highway:"HWY" };
+
+/* Officer-per-zone roster, from Code_Enforcement_Zones.csv (NAMES / ZONES) */
+const ZONE_OFFICER = {
+  "NE1":"Martin Lehman","NE2":"Stephanie Folsom","NE3":"Pam Beesley-Farris","NE4":"Tammy Whitaker","NE5":"Patrick Hayhurst",
+  "NW1":"ioulia Scott","NW2":"Jeffrey Colon","NW3":"Scott Irvin","NW4":"Sherry Kluczynski",
+  "SE1":"Casey Fears","SE2":"Mark Donisi","SE3":"Samantha Altman","SE4":"Frank John","SE5":"Robert Liguori","SE6":"Thalia Curtis",
+  "SW1":"Pete Strainovici","SW2":"John Williams","SW3":"Mack Cline","SW4":"Aaron Hurley","SW5":"Michael Stuff","SW6":"Jamal Crawford",
+  "MC-N":"Eric Speranza","MC-C":"David Zimmer","MC-S":"Andrew Wagner"
+};
+function nameKey(s) {
+  return String(s || "").toLowerCase().replace(/[^a-z\s-]/g, " ").split(/\s+/).filter(Boolean).sort().join(" ");
+}
+const ZONE_BY_NAME = {};
+Object.keys(ZONE_OFFICER).forEach(z => { ZONE_BY_NAME[nameKey(ZONE_OFFICER[z])] = z; });
+
+const LIEN = "https://capeims.capecoral.gov/arcgis/rest/services/OpenData/OpenData/MapServer/6";
+const ISSUES = "https://capeims.capecoral.gov/arcgis/rest/services/OpenData/OpenData/MapServer/4";
+const OWNERSHIP = "https://capeims.capecoral.gov/arcgis/rest/services/OpenData/OpenData/MapServer/12";
+const SPATIAL = "https://capeims.capecoral.gov/arcgis/rest/services/AGOL/Code_Enforcement_Cases/MapServer/3";
+/* both tables reject a named outFields list and pad key columns with spaces —
+   query with outFields=* and match with LIKE 'value%' */
+function anyUrl(base, params) {
+  return base + "/query?" + Object.keys(params).map(k => k + "=" + encodeURIComponent(params[k])).join("&");
+}
+function trim(v) { return String(v === null || v === undefined ? "" : v).trim(); }
+
+function url(params) {
+  return SERVICE + "/query?" + Object.keys(params).map(k => k + "=" + encodeURIComponent(params[k])).join("&");
+}
+function esc(s) { return String(s).replace(/'/g, "''"); }
+function fmtDate(ms) {
+  if (!ms) return "";
+  const d = new Date(ms);
+  return MONTH[d.getMonth()] + " " + String(d.getDate()).padStart(2, "0") + ", " + d.getFullYear();
+}
+function tagFor(s) {
+  const v = String(s || "").toLowerCase();
+  if (v.indexOf("closed") === 0 || v.indexOf("complied") !== -1) return "tag-neutral";
+  if (v.indexOf("lien") !== -1 || v.indexOf("hearing") !== -1) return "tag-outline";
+  return "tag-accent";
+}
+/* The city types the reporting party into the case description itself
+   ("PER CP FRANK B 4935 AGUALINDA BLVD"). Pull it back out as its own field. */
+function reporterOf(desc) {
+  const d = String(desc || "");
+  const up = d.toUpperCase();
+  const clean = s => String(s).replace(/[\s,;.\-]+$/, "").trim();
+  let m = /PER\s+CP\s*[:\-]?\s*(.{2,70})/i.exec(d);
+  if (m) return { who: clean(m[1]), kind: "Named" };
+  m = /COMPLAINANT\s*[:\-]?\s*(.{2,70})/i.exec(d);
+  if (m) return { who: clean(m[1]), kind: "Named" };
+  m = /CALLER\s*[:\-]?\s*(.{2,70})/i.exec(d);
+  if (m) return { who: clean(m[1]), kind: "Named" };
+  if (/ANONYMOUS/.test(up)) return { who: "Anonymous", kind: "Anonymous" };
+  if (/NEIGHBOR/.test(up)) return { who: "Neighbor, unnamed", kind: "Neighbor" };
+  return { who: "", kind: "" };
+}
+
+/* No source carries a "how was this reported" field, so origin is inferred —
+   from the reporting-party markers first, then from case type. */
+const PROGRAM_TYPES = ["WATERING VIOLATIONS", "FORECLOSURE REGISTRATION", "MANDATORY UTILITY CONNECTIONS", "EDUCATIONAL", "BTR & CU", "CONTRACTORS & CRB "];
+function originOf(desc, type, subtype) {
+  const d = String(desc || "").toUpperCase();
+  const t = String(type || "").toUpperCase().trim();
+  const s = String(subtype || "").toUpperCase();
+  if (/PER\s+CP|COMPLAINANT|CALLER/.test(d)) return { label: "Citizen complaint, named", tag: "tag-accent" };
+  if (/ANONYMOUS/.test(d)) return { label: "Anonymous complaint", tag: "tag-outline" };
+  if (/NEIGHBOR/.test(d)) return { label: "Neighbor complaint", tag: "tag-accent" };
+  if (t === "SITE CHECK" || /SITE INSPECTION/.test(s) || /OBSERVED|DRIVE BY|DRIVE-BY|PROACTIVE|SWEEP|WHILE ON PATROL/.test(d))
+    return { label: "Officer-initiated", tag: "tag-neutral" };
+  if (PROGRAM_TYPES.indexOf(t) !== -1 || PROGRAM_TYPES.indexOf(t + " ") !== -1)
+    return { label: "City program", tag: "tag-neutral" };
+  return { label: "Not stated", tag: "tag-neutral" };
+}
+
+function pct(str, lo, span) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
+  return (lo + (h % span)) + "%";
+}
+function term(t) {
+  const k = t.toLowerCase().replace(/[.,]/g, "");
+  return (SUFFIX[k] || t).toUpperCase();
+}
+function textClause(t) {
+  const v = esc(term(t));
+  return "(" + TEXT_FIELDS.map(f => "UPPER(" + f + ") LIKE '%" + v + "%'").join(" OR ") + ")";
+}
+
+/* Match what the user actually typed instead of ORing every term across every
+   field — a house number would otherwise hit case descriptions and STRAPs, and
+   a directional like SW would match most of the city. */
+function queryClauses(text) {
+  const raw = String(text || "").trim();
+  if (!raw) return [];
+  const up = raw.toUpperCase();
+  const solid = up.replace(/\s+/g, "");
+
+  // CODE22-017213, CE-2025-418, RV26-003244
+  if (/^[A-Z]{2,6}\d{0,4}-?\d{2,6}(-\d{1,6})?$/.test(solid) && /\d/.test(solid)) {
+    return ["UPPER(CaseNumber) LIKE '%" + esc(solid) + "%'"];
+  }
+  // STRAP: 164523C1046410330
+  if (/^[0-9][0-9A-Z]{14,19}$/.test(solid) && (solid.match(/\d/g) || []).length >= 12) {
+    return ["UPPER(STRAPGIS) LIKE '" + esc(solid) + "%'"];
+  }
+  // a street number alone — anchor it to the start of the address
+  if (/^\d+$/.test(solid)) {
+    return ["UPPER(SiteAddressGIS) LIKE '" + esc(solid) + " %'"];
+  }
+  // an address: starts with a house number, so every term must be in the address
+  if (/^\d+\s+\S/.test(up)) {
+    const words = up.split(/\s+/).filter(Boolean);
+    const clauses = ["UPPER(SiteAddressGIS) LIKE '" + esc(words[0]) + " %'"];
+    words.slice(1).forEach(w => {
+      clauses.push("UPPER(SiteAddressGIS) LIKE '%" + esc(term(w)) + "%'");
+    });
+    return clauses;
+  }
+  // words — owner, officer, case type, description
+  return up.split(/\s+/).filter(Boolean).map(textClause);
+}
+
+class Component extends DCLogic {
+  state = {
+    q: "", aq: "", status: "", type: "", year: "", officer: "", zone: "", owner: "", ownerDraft: "", origin: "",
+    filtersOpen: false, openId: null, wide: true, searched: false,
+    rows: [], total: null, loading: false, error: "", grandTotal: null, recent: [], extras: {},
+    ownerProps: [], ownerPropTotal: 0, ownerPropsLoading: false,
+    statuses: [], types: [], officerList: [],
+    suggestions: [], sugOpen: false, sugLoading: false, sugIx: -1
+  };
+
+  constructor(props) {
+    super(props);
+    this.searchRef = React.createRef();
+    this.token = 0;
+    this.sugToken = 0;
+    this.ownerToken = 0;
+  }
+
+  componentDidMount() {
+    this._resize = () => {
+      const wide = window.innerWidth >= 1040;
+      if (wide !== this.state.wide) this.setState({ wide });
+    };
+    this._resize();
+    window.addEventListener("resize", this._resize);
+    this._key = e => { if (e.key === "Escape") this.setState({ openId: null, sugOpen: false }); };
+    window.addEventListener("keydown", this._key);
+
+    const m = /officer=([^&]+)/.exec(window.location.hash || "");
+    if (m) {
+      const who = decodeURIComponent(m[1]);
+      this.setState({ officer: who }, () => this.run(true, ""));
+    }
+
+    this.distinct("Status", "statuses");
+    this.distinct("CaseType", "types");
+    this.distinct("UpdatedBy", "officerList");
+    fetch(url({ where: "1=1", returnCountOnly: "true", f: "json" }))
+      .then(r => r.json()).then(j => this.setState({ grandTotal: j.count })).catch(() => {});
+
+    fetch(url({ where: "opened IS NOT NULL", outFields: "CaseNumber,SiteAddressGIS,CaseType,CaseSubtype,Status,opened,UpdatedBy", orderByFields: "opened DESC", resultRecordCount: 8, returnGeometry: "false", f: "json" }))
+      .then(r => r.json())
+      .then(j => {
+        const recent = (j.features || []).map(f => {
+          const a = f.attributes;
+          const officer = (a.UpdatedBy || "").trim();
+          return {
+            caseNo: (a.CaseNumber || "").trim(),
+            address: (a.SiteAddressGIS || "").trim() || "No site address on record",
+            type: [(a.CaseType || "").trim(), (a.CaseSubtype || "").trim()].filter(Boolean).join(" · ") || "—",
+            status: (a.Status || "—").trim(),
+            statusTag: tagFor(a.Status),
+            opened: fmtDate(a.opened),
+            zone: ZONE_BY_NAME[nameKey(officer)] || ""
+          };
+        });
+        this.setState({ recent });
+      }).catch(() => {});
+  }
+  componentWillUnmount() {
+    window.removeEventListener("resize", this._resize);
+    window.removeEventListener("keydown", this._key);
+    clearTimeout(this._sugTimer);
+  }
+
+  distinct(field, key) {
+    fetch(url({ where: field + " IS NOT NULL", outFields: field, returnDistinctValues: "true", orderByFields: field, f: "json" }))
+      .then(r => r.json())
+      .then(j => {
+        const vals = (j.features || []).map(f => f.attributes[field]).filter(v => v && String(v).trim());
+        this.setState({ [key]: vals });
+      }).catch(() => {});
+  }
+
+  where(queryText) {
+    const st = this.state;
+    const clauses = [];
+    queryClauses(queryText).forEach(c => clauses.push(c));
+    if (st.status) clauses.push("Status = '" + esc(st.status) + "'");
+    if (st.type) clauses.push("CaseType = '" + esc(st.type) + "'");
+    if (st.officer) clauses.push("UpdatedBy = '" + esc(st.officer) + "'");
+    /* owner search — names are filed LAST FIRST, so match each word against
+       either owner field and let order not matter */
+    if (st.owner && st.owner.trim()) {
+      st.owner.trim().toUpperCase().split(/\s+/).filter(Boolean).forEach(w => {
+        const v = esc(w);
+        clauses.push("(UPPER(OwnerGIS) LIKE '%" + v + "%' OR UPPER(OwnerOtherGIS) LIKE '%" + v + "%')");
+      });
+    }
+    if (st.year) clauses.push("opened >= date '" + st.year + "-01-01' AND opened < date '" + (+st.year + 1) + "-01-01'");
+    if (st.origin === "named") clauses.push("(UPPER(case_description) LIKE '%PER CP%' OR UPPER(case_description) LIKE '%COMPLAINANT%' OR UPPER(case_description) LIKE '%CALLER%')");
+    if (st.origin === "anon") clauses.push("UPPER(case_description) LIKE '%ANONYMOUS%'");
+    if (st.origin === "neighbor") clauses.push("UPPER(case_description) LIKE '%NEIGHBOR%'");
+    if (st.zone && ZONE_OFFICER[st.zone]) {
+      const parts = ZONE_OFFICER[st.zone].split(/\s+/).filter(Boolean);
+      clauses.push("(" + parts.map(p => "UPPER(UpdatedBy) LIKE '%" + esc(p.toUpperCase()) + "%'").join(" AND ") + ")");
+    }
+    return clauses.length ? clauses.join(" AND ") : "1=1";
+  }
+
+  /* type-ahead: top matches straight from the service, debounced */
+  suggest(text) {
+    clearTimeout(this._sugTimer);
+    if (text.trim().length < 3) {
+      this.setState({ suggestions: [], sugOpen: false, sugLoading: false, sugIx: -1 });
+      return;
+    }
+    this.setState({ sugOpen: true, sugLoading: true, sugIx: -1 });
+    this._sugTimer = setTimeout(() => {
+      const my = ++this.sugToken;
+      const where = queryClauses(text).join(" AND ") || "1=1";
+      fetch(url({ where, outFields: "CaseNumber,SiteAddressGIS,OwnerGIS,CaseType,Status,opened", orderByFields: "opened DESC", resultRecordCount: 7, returnGeometry: "false", f: "json" }))
+        .then(r => r.json())
+        .then(j => {
+          if (my !== this.sugToken) return;
+          const sug = (j.features || []).map(f => {
+            const a = f.attributes;
+            return {
+              caseNo: a.CaseNumber || "",
+              primary: (a.SiteAddressGIS || "").trim() || (a.CaseNumber || "").trim(),
+              secondary: [(a.CaseType || "").trim(), fmtDate(a.opened)].filter(Boolean).join(" · ")
+            };
+          });
+          this.setState({ suggestions: sug, sugLoading: false });
+        })
+        .catch(() => { if (my === this.sugToken) this.setState({ suggestions: [], sugLoading: false }); });
+    }, 260);
+  }
+
+  run(reset, queryText) {
+    const my = ++this.token;
+    const aq = queryText === undefined ? this.state.aq : queryText;
+    const offset = reset ? 0 : this.state.rows.length;
+    const where = this.where(aq);
+    this.setState({ loading: true, error: "", searched: true, sugOpen: false, openId: reset ? null : this.state.openId });
+
+    if (reset) {
+      fetch(url({ where, returnCountOnly: "true", f: "json" }))
+        .then(r => r.json())
+        .then(j => { if (my === this.token) this.setState({ total: typeof j.count === "number" ? j.count : null }); })
+        .catch(() => {});
+    }
+
+    fetch(url({ where, outFields: OUT, orderByFields: "updated DESC", resultOffset: offset, resultRecordCount: PAGE, returnGeometry: "false", f: "json" }))
+      .then(r => r.json())
+      .then(j => {
+        if (my !== this.token) return;
+        if (j.error) throw new Error(j.error.message || "service error");
+        const recs = (j.features || []).map(f => {
+          const a = f.attributes;
+          const strap = (a.STRAPGIS || "").trim();
+          const officer = (a.UpdatedBy || "").trim();
+          const owners = [(a.OwnerGIS || "").trim(), (a.OwnerOtherGIS || "").trim()].filter(Boolean);
+          const zone = ZONE_BY_NAME[nameKey(officer)] || "";
+          const rep = reporterOf(a.case_description);
+          const org = originOf(a.case_description, a.CaseType, a.CaseSubtype);
+          return {
+            origin: org.label,
+            originTag: org.tag,
+            reporter: rep.who || "Not stated",
+            reporterKind: rep.kind,
+            hasReporter: !!rep.who,
+            reporterTag: rep.kind === "Named" ? "tag-accent" : "tag-neutral",
+            id: a.ESRI_OID,
+            caseNo: (a.CaseNumber || "—").trim(),
+            address: (a.SiteAddressGIS || "").trim() || "No site address on record",
+            owner: owners[0] || "—",
+            ownerFull: owners.join(" + ") || "—",
+            type: (a.CaseType || "—").trim(),
+            typeLine: [(a.CaseType || "").trim(), (a.CaseSubtype || "").trim()].filter(Boolean).join(" · ") || "—",
+            status: (a.Status || "—").trim(),
+            statusTag: tagFor(a.Status),
+            officer: officer || "—",
+            zone,
+            officerLine: officer ? (zone ? officer + " · zone " + zone : officer) : "—",
+            description: (a.case_description || "").trim() || "No description on record.",
+            strap: strap || "—",
+            legal: (a.legaldescription || "").trim() || "—",
+            mailing: [(a.MailingAddr1GIS || "").trim(), (a.MailingCityGIS || "").trim(), (a.MailingStateGIS || "").trim(), (a.MailingZipGIS || "").trim()].filter(Boolean).join(", ") || "—",
+            openedShort: fmtDate(a.opened) || "—",
+            updatedShort: fmtDate(a.updated) || "—",
+            dateLine: ["Opened " + (fmtDate(a.opened) || "—"), a.closed ? "closed " + fmtDate(a.closed) : "", a.updated ? "updated " + fmtDate(a.updated) : ""].filter(Boolean).join(" · "),
+            pinX: pct(strap + a.CaseNumber, 22, 56),
+            pinY: pct(a.CaseNumber + strap, 20, 60)
+          };
+        });
+        this.setState(s => ({ rows: reset ? recs : s.rows.concat(recs), loading: false }));
+      })
+      .catch(e => { if (my === this.token) this.setState({ loading: false, error: String(e.message || e) }); });
+  }
+
+  set(k) {
+    return e => this.setState({ [k]: e.target.value }, () => this.run(true));
+  }
+
+  /* every parcel this owner holds — including ones with no cases at all */
+  loadOwnerProps(owner) {
+    const words = String(owner || "").trim().toUpperCase().split(/\s+/).filter(Boolean);
+    if (!words.length) { this.setState({ ownerProps: [], ownerPropTotal: 0 }); return; }
+    const where = words.map(w =>
+      "(UPPER(Owner_Name) LIKE '%" + esc(w) + "%' OR UPPER(OwnerOthers) LIKE '%" + esc(w) + "%')").join(" AND ");
+    const my = ++this.ownerToken;
+    this.setState({ ownerPropsLoading: true });
+
+    fetch(anyUrl(OWNERSHIP, { where, returnCountOnly: "true", f: "json" }))
+      .then(r => r.json())
+      .then(j => { if (my === this.ownerToken) this.setState({ ownerPropTotal: j.count || 0 }); })
+      .catch(() => {});
+
+    fetch(anyUrl(OWNERSHIP, { where, outFields: "*", orderByFields: "Site_Address", resultRecordCount: 40, returnGeometry: "false", f: "json" }))
+      .then(r => r.json())
+      .then(j => {
+        if (my !== this.ownerToken) return;
+        const props = (j.features || []).map(f => {
+          const a = f.attributes;
+          const assessed = Number(a.Assessed) || 0;
+          return {
+            address: trim(a.Site_Address) || "No address on record",
+            strap: trim(a.Strap),
+            owner: [trim(a.Owner_Name).replace(/[\s+&,]+$/, ""), trim(a.OwnerOthers).replace(/[\s+&,]+$/, "")].filter(Boolean).join(" + "),
+            zoning: trim(a.Zoning) || "—",
+            assessed: assessed ? "$" + Math.round(assessed).toLocaleString() : "—"
+          };
+        });
+        this.setState({ ownerProps: props, ownerPropsLoading: false });
+      })
+      .catch(() => { if (my === this.ownerToken) this.setState({ ownerProps: [], ownerPropsLoading: false }); });
+  }
+
+  /* liens on the parcel + 311 complaints at the address, fetched when a row opens */
+  loadExtras(row) {
+    const extras = this.state.extras || {};
+    if (extras[row.id]) return;
+    this.setState({ extras: Object.assign({}, extras, { [row.id]: { loading: true, liens: [], complaints: [] } }) });
+
+    const put = patch => this.setState(s => ({
+      extras: Object.assign({}, s.extras, { [row.id]: Object.assign({}, s.extras[row.id], patch) })
+    }));
+
+    const strap = row.strap && row.strap !== "—" ? row.strap : "";
+    if (strap) {
+      fetch(anyUrl(LIEN, { where: "Strap LIKE '" + esc(strap) + "%'", outFields: "*", orderByFields: "Date_Liened DESC", resultRecordCount: 6, returnGeometry: "false", f: "json" }))
+        .then(r => r.json())
+        .then(j => {
+          const liens = (j.features || []).map(f => {
+            const a = f.attributes;
+            const amt = Number(a.Lien_Amount) || 0;
+            return {
+              number: trim(a.Lien_Number) || "—",
+              amount: amt ? "$" + amt.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "—",
+              dated: fmtDate(a.Date_Liened) || "—",
+              active: trim(a.Active_Lien).toUpperCase() === "Y",
+              released: fmtDate(a.Lien_Release_Date),
+              who: trim(a.Customer_Name) || "—"
+            };
+          });
+          put({ liens });
+        }).catch(() => put({ liens: [] }));
+
+      fetch(anyUrl(LIEN, { where: "Strap LIKE '" + esc(strap) + "%' AND Active_Lien = 'Y'", returnCountOnly: "true", f: "json" }))
+        .then(r => r.json())
+        .then(j => put({ activeLiens: typeof j.count === "number" ? j.count : null }))
+        .catch(() => {});
+    } else {
+      put({ liens: [] });
+    }
+
+    /* the spatial case layer carries the assigned officer, zoning and future
+       land use that the main table lacks — matched on case number */
+    if (row.caseNo && row.caseNo !== "—") {
+      fetch(anyUrl(SPATIAL, { where: "CaseNumber = '" + esc(row.caseNo) + "'", outFields: "*", returnGeometry: "false", resultRecordCount: 1, f: "json" }))
+        .then(r => r.json())
+        .then(j => {
+          const a = ((j.features || [])[0] || {}).attributes;
+          if (!a) { put({ assigned: "Not in the assignment file" }); return; }
+          const who = trim(a.Assinged_userName);
+          const mail = trim(a.Assigned_userID);
+          put({
+            assigned: who ? (mail ? who + " · " + mail : who) : "Unassigned",
+            zoning: trim(a.Zoning), flu: trim(a.Future_Land_Use)
+          });
+        })
+        .catch(() => put({ assigned: "" }));
+    }
+
+    const addr = row.address && row.address.indexOf("No site") !== 0 ? row.address : "";
+    if (addr) {
+      const terms = addr.split(/\s+/).filter(Boolean)
+        .map(t => "UPPER(Site_Address) LIKE '%" + esc(t.toUpperCase()) + "%'").join(" AND ");
+      fetch(anyUrl(ISSUES, { where: terms, outFields: "*", orderByFields: "CreateDate DESC", resultRecordCount: 6, returnGeometry: "false", f: "json" }))
+        .then(r => r.json())
+        .then(j => {
+          const complaints = (j.features || []).map(f => {
+            const a = f.attributes;
+            return {
+              title: trim(a.Title) || trim(a.Nature_Type) || trim(a.Category) || "311 issue",
+              category: trim(a.Category) || "—",
+              status: trim(a.StatusDescription) || trim(a.Status) || "—",
+              created: fmtDate(a.CreateDate) || "—",
+              resolved: fmtDate(a.ResolvedDate),
+              via: trim(a.Created_Via),
+              description: trim(a.Description)
+            };
+          });
+          put({ complaints, loading: false });
+        }).catch(() => put({ complaints: [], loading: false }));
+    } else {
+      put({ complaints: [], loading: false });
+    }
+  }
+
+  renderVals() {
+    const st = this.state;
+    const chips = [];
+    const chip = (k, label) => { if (st[k]) chips.push({ label, onRemove: () => this.setState({ [k]: "" }, () => this.run(true)) }); };
+    chip("year", "Opened " + st.year);
+    chip("status", st.status);
+    chip("type", st.type);
+    chip("officer", "Updated by " + st.officer);
+    chip("zone", "Zone " + st.zone);
+    if (st.origin) chips.push({
+      label: st.origin === "named" ? "Named complainant" : (st.origin === "anon" ? "Anonymous" : "Neighbor"),
+      onRemove: () => this.setState({ origin: "" }, () => this.run(true))
+    });
+    if (st.owner) chips.push({ label: "Owner " + st.owner, onRemove: () => this.setState({ owner: "", ownerDraft: "" }, () => this.run(true)) });
+
+    const years = [];
+    for (let y = 2026; y >= 2006; y--) years.push(String(y));
+
+    const officers = st.officerList.map(n => {
+      const z = ZONE_BY_NAME[nameKey(n)];
+      return { v: n, label: z ? n + " — " + z : n };
+    });
+
+    const suggestions = st.suggestions.map((s, i) => ({
+      primary: s.primary,
+      secondary: s.secondary,
+      bg: i === st.sugIx ? "color-mix(in srgb, var(--color-accent) 16%, transparent)" : "transparent",
+      onPick: () => this.setState({ q: s.caseNo, sugOpen: false }, () => this.run(true, s.caseNo))
+    }));
+
+    const extras = st.extras || {};
+    const rows = st.rows.map(r => Object.assign({}, r, {
+      open: st.openId === r.id,
+      bg: st.openId === r.id ? "color-mix(in srgb, var(--color-accent) 10%, transparent)" : "transparent",
+      liens: (extras[r.id] && extras[r.id].liens) || [],
+      complaints: (extras[r.id] && extras[r.id].complaints) || [],
+      lienLabel: !extras[r.id] ? "" :
+        (extras[r.id].liens && extras[r.id].liens.length
+          ? (extras[r.id].activeLiens ? extras[r.id].activeLiens.toLocaleString() + " active on this parcel" : "most recent first")
+          : "None recorded on this parcel"),
+      complaintLabel: !extras[r.id] ? "" :
+        ((extras[r.id].complaints && extras[r.id].complaints.length) ? "most recent first" : "None recorded at this address"),
+      extrasLoading: !!(extras[r.id] && extras[r.id].loading),
+      assigned: (extras[r.id] && extras[r.id].assigned) || (extras[r.id] ? "Looking…" : ""),
+      landUse: extras[r.id] && (extras[r.id].zoning || extras[r.id].flu)
+        ? [extras[r.id].zoning, extras[r.id].flu].filter(Boolean).join(" · ")
+        : "—",
+      onToggle: () => {
+        const opening = st.openId !== r.id;
+        this.setState({ openId: opening ? r.id : null });
+        if (opening) this.loadExtras(r);
+      },
+      onAddress: () => this.setState({ q: r.address, aq: r.address, status: "", type: "", year: "", officer: "", zone: "" }, () => this.run(true, r.address)),
+      onOfficer: () => this.setState({ q: "", aq: "", officer: r.officer, status: "", type: "", year: "", zone: "" }, () => this.run(true, ""))
+    }));
+
+    return {
+      q: st.q, year: st.year, status: st.status, type: st.type, officer: st.officer, zone: st.zone,
+      years, statuses: st.statuses, types: st.types, officers,
+      zoneOptions: Object.keys(ZONE_OFFICER).map(z => ({ v: z, label: z + " — " + ZONE_OFFICER[z] })),
+      searchRef: this.searchRef,
+      heroTop: st.searched ? "22.4px" : "8vh",
+      totalLabel: st.grandTotal ? st.grandTotal.toLocaleString() : "hundreds of thousands of",
+      filtersOpen: st.filtersOpen,
+      filtersLabel: chips.length ? "Filters · " + chips.length : "Filters",
+      loadLabel: st.error ? "Case service error: " + st.error : (st.loading ? "Querying the case file…" : ""),
+      chips, rows, suggestions,
+      showRecent: !st.searched && st.recent.length > 0,
+      recent: st.recent.map(r => Object.assign({}, r, {
+        onOpen: () => this.setState({ q: r.caseNo, aq: r.caseNo, sugOpen: false }, () => this.run(true, r.caseNo))
+      })),
+      sugOpen: st.sugOpen && (suggestions.length > 0 || st.sugLoading),
+      sugEmpty: st.sugLoading && suggestions.length === 0,
+      sugEmptyLabel: "Looking…",
+      searched: st.searched,
+      isEmpty: st.searched && !st.loading && !st.error && st.rows.length === 0,
+      isDesktop: st.wide && rows.length > 0,
+      isPhone: !st.wide && rows.length > 0,
+      countLabel: st.error || st.total === null ? "" :
+        (st.total === 1 ? "1 case" : st.total.toLocaleString() + " cases") + " · showing " + rows.length + ", most recently updated first",
+      hasMore: st.total !== null && rows.length > 0 && rows.length < st.total,
+      moreLabel: st.loading ? "Loading…" : "Show " + PAGE + " more",
+      onMore: () => this.run(false),
+      onQuery: e => {
+        const v = e.target.value;
+        this.setState({ q: v });
+        this.suggest(v);
+      },
+      onBlur: () => setTimeout(() => this.setState({ sugOpen: false }), 120),
+      onKey: e => {
+        const n = st.suggestions.length;
+        if (e.key === "ArrowDown" && n) { e.preventDefault(); this.setState(s => ({ sugOpen: true, sugIx: (s.sugIx + 1) % n })); }
+        else if (e.key === "ArrowUp" && n) { e.preventDefault(); this.setState(s => ({ sugOpen: true, sugIx: (s.sugIx - 1 + n) % n })); }
+        else if (e.key === "Enter") {
+          if (st.sugOpen && st.sugIx >= 0 && st.suggestions[st.sugIx]) {
+            const s = st.suggestions[st.sugIx];
+            this.setState({ q: s.caseNo, sugOpen: false }, () => this.run(true, s.caseNo));
+          } else {
+            this.setState(s => ({ aq: s.q, sugOpen: false }), () => this.run(true));
+          }
+        }
+      },
+      onSearch: () => this.setState(s => ({ aq: s.q, sugOpen: false }), () => this.run(true)),
+      onToggleFilters: () => this.setState(s => ({ filtersOpen: !s.filtersOpen })),
+      onYear: this.set("year"), onStatus: this.set("status"), onType: this.set("type"),
+      onOfficer: this.set("officer"), onZone: this.set("zone"), onOrigin: this.set("origin"),
+      origin: st.origin,
+      ownerDraft: st.ownerDraft,
+      onOwnerDraft: e => this.setState({ ownerDraft: e.target.value }),
+      onOwnerKey: e => { if (e.key === "Enter") this.setState(s => ({ owner: s.ownerDraft }), () => { this.run(true); this.loadOwnerProps(this.state.owner); }); },
+      onOwnerApply: () => this.setState(s => ({ owner: s.ownerDraft }), () => { this.run(true); this.loadOwnerProps(this.state.owner); }),
+      ownerProps: (st.ownerProps || []).map(p => Object.assign({}, p, {
+        onPick: () => this.setState({ q: p.address, aq: p.address, sugOpen: false }, () => this.run(true, p.address))
+      })),
+      showOwnerProps: !!(st.owner && (st.ownerProps || []).length),
+      ownerPropsLabel: st.ownerPropsLoading ? "looking up parcels…" :
+        (st.ownerPropTotal
+          ? st.ownerPropTotal.toLocaleString() + " parcel" + (st.ownerPropTotal === 1 ? "" : "s") + " on the tax roll" + (st.ownerPropTotal > 40 ? " · showing first 40" : "")
+          : "")
+    };
+  }
+}
+</script>
+</body>
+</html>

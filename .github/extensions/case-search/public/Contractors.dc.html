@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/nocturne-5223f3d0-36d8-45ce-9356-2ac9c8ce1793/styles.css">
+<script src="_ds/nocturne-5223f3d0-36d8-45ce-9356-2ac9c8ce1793/_ds_bundle.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap">
+<style>
+  body { margin: 0; background: #161826; }
+  a { color: var(--color-accent); text-decoration: none; }
+  a:hover { color: var(--color-accent-400); text-decoration: underline; }
+</style>
+</helmet>
+<div style="min-height:100vh; display:flex; flex-direction:column; background:var(--color-bg); color:var(--color-text); font-family:var(--font-body); font-size:14px">
+
+  <div style="flex:1; width:100%; max-width:1120px; margin:0 auto; padding:0 22.4px; box-sizing:border-box">
+
+    <div style="display:flex; gap:16.8px; padding:16.8px 0 0; font-size:12.5px">
+      <a href="Case Search v2.dc.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Code enforcement cases</a>
+      <a href="Officers.dc.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Officers</a>
+      <a href="Planning Projects.dc.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Planning projects</a>
+      <span style="color:var(--color-accent-300)">Contractors</span>
+      <a href="Building Permits.dc.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Building permits</a>
+      <a href="Inspections.dc.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Inspections</a>
+      <a href="Parcel Map.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Parcel map</a>
+      <a href="Public Works.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Public works</a>
+      <a href="City Salaries.dc.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Salaries</a>
+    </div>
+
+    <div style="margin-top:{{ heroTop }}; transition:margin-top 220ms ease">
+      <h1 style="font-size:26px; margin:0 0 8.4px; letter-spacing:-0.02em">Cape Coral Contractor Permit Activity</h1>
+      <p style="margin:0 0 16.8px; font-size:14.5px; line-height:1.55; max-width:640px; color:color-mix(in srgb, var(--color-text) 68%, transparent); text-wrap:pretty">Look up a contractor or company to see what kind of permits they pull and how many they've pulled in the last 365 days. Owner-builders appear here alongside licensed firms, exactly as they do in the permit file.</p>
+
+      <div style="display:flex; flex-wrap:wrap; gap:8.4px; align-items:center; max-width:760px">
+        <div style="position:relative; display:flex; align-items:center; flex:1; min-width:240px">
+          <svg width="17" height="17" viewBox="0 0 256 256" fill="currentColor" style="position:absolute; left:11px; opacity:0.4; pointer-events:none"><path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"></path></svg>
+          <input class="input" ref="{{ searchRef }}" value="{{ q }}" onChange="{{ onQuery }}" onKeyDown="{{ onKey }}" placeholder="Kelly Air Systems, roofing, 239-240-3170…" style="width:100%; padding:11.2px 11.2px 11.2px 36px; font-size:15px">
+        </div>
+        <button class="btn btn-primary" onClick="{{ onSearch }}" style="padding:11.2px 22.4px; font-size:14.5px">Search</button>
+      </div>
+
+      <div style="display:flex; flex-wrap:wrap; gap:5.6px; align-items:center; margin-top:11.2px; min-height:30px">
+        <button class="btn btn-secondary" onClick="{{ onToggleFilters }}" style="font-size:13px; gap:7px">
+          <svg width="14" height="14" viewBox="0 0 256 256" fill="currentColor"><path d="M40,88H73a32,32,0,0,0,62,0h81a8,8,0,0,0,0-16H135a32,32,0,0,0-62,0H40a8,8,0,0,0,0,16Zm64-24a16,16,0,1,1-16,16A16,16,0,0,1,104,64ZM216,168H199a32,32,0,0,0-62,0H40a8,8,0,0,0,0,16h97a32,32,0,0,0,62,0h17a8,8,0,0,0,0-16Zm-48,24a16,16,0,1,1,16-16A16,16,0,0,1,168,192Z"></path></svg>
+          {{ filtersLabel }}
+        </button>
+        <sc-for list="{{ chips }}" as="c" hint-placeholder-count="0">
+          <button class="tag tag-accent" onClick="{{ c.onRemove }}" style="border:0; cursor:pointer; font-family:var(--font-body); gap:7px">{{ c.label }} <span style="opacity:0.55">✕</span></button>
+        </sc-for>
+        <span style="font-size:12px; color:color-mix(in srgb, var(--color-text) 45%, transparent); margin-left:5.6px">{{ loadLabel }}</span>
+      </div>
+
+      <sc-if value="{{ filtersOpen }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-top:11.2px; padding:16.8px; border-radius:8px; background:var(--color-surface); box-shadow:var(--shadow-sm); display:flex; flex-wrap:wrap; gap:11.2px; align-items:flex-end">
+          <label class="field" style="display:flex; flex-direction:column; gap:4px; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:color-mix(in srgb, var(--color-text) 55%, transparent)">Permit type
+            <select class="input" value="{{ ptype }}" onChange="{{ onPtype }}" style="padding:5.6px 8.4px; font-size:13px; max-width:300px; text-transform:none; letter-spacing:0; color:var(--color-text)">
+              <option value="">Any permit type</option>
+              <sc-for list="{{ ptypes }}" as="t" hint-placeholder-count="10"><option value="{{ t }}">{{ t }}</option></sc-for>
+            </select>
+          </label>
+          <label class="field" style="display:flex; flex-direction:column; gap:4px; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:color-mix(in srgb, var(--color-text) 55%, transparent)">Minimum permits
+            <select class="input" value="{{ minCount }}" onChange="{{ onMin }}" style="padding:5.6px 8.4px; font-size:13px; text-transform:none; letter-spacing:0; color:var(--color-text)">
+              <option value="">Any number</option>
+              <option value="2">2 or more</option>
+              <option value="5">5 or more</option>
+              <option value="10">10 or more</option>
+              <option value="25">25 or more</option>
+              <option value="50">50 or more</option>
+            </select>
+          </label>
+          <label class="field" style="display:flex; flex-direction:column; gap:4px; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:color-mix(in srgb, var(--color-text) 55%, transparent)">Has a phone on file
+            <select class="input" value="{{ hasPhone }}" onChange="{{ onPhone }}" style="padding:5.6px 8.4px; font-size:13px; text-transform:none; letter-spacing:0; color:var(--color-text)">
+              <option value="">Either way</option>
+              <option value="yes">Phone on file</option>
+              <option value="no">No phone</option>
+            </select>
+          </label>
+        </div>
+      </sc-if>
+    </div>
+
+    <div style="margin-top:22.4px">
+      <div style="display:flex; flex-wrap:wrap; gap:11.2px; align-items:baseline; margin-bottom:8.4px">
+        <div style="font-size:12.5px; color:color-mix(in srgb, var(--color-text) 58%, transparent)">{{ countLabel }}</div>
+        <div style="margin-left:auto; display:flex; gap:5.6px; align-items:center">
+          <span style="font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:color-mix(in srgb, var(--color-text) 45%, transparent)">Sort</span>
+          <select class="input" value="{{ sort }}" onChange="{{ onSort }}" style="padding:4px 8.4px; font-size:12.5px">
+            <option value="count">Most permits</option>
+            <option value="name">Name, A–Z</option>
+            <option value="type">Permit type</option>
+          </select>
+        </div>
+      </div>
+
+      <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:48px 0; font-size:15px; color:color-mix(in srgb, var(--color-text) 60%, transparent)">Nothing matched that search.</div>
+      </sc-if>
+
+      <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+        <div>
+          <div style="display:grid; grid-template-columns:minmax(200px,1fr) 264px 148px 96px; gap:11.2px; padding:0 8.4px 8.4px; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:color-mix(in srgb, var(--color-text) 55%, transparent)">
+            <div>Contractor</div><div>Permit type</div><div>Phone</div><div style="text-align:right">Permits · 365d</div>
+          </div>
+          <sc-for list="{{ rows }}" as="r" hint-placeholder-count="10">
+            <div style="border-top:1px solid var(--color-divider); display:grid; grid-template-columns:minmax(200px,1fr) 264px 148px 96px; gap:11.2px; padding:9px 8.4px; font-size:13.5px; align-items:center">
+              <div>
+                {{ r.name }}
+                <sc-if value="{{ r.company }}" hint-placeholder-val="{{ false }}">
+                  <span style="font-size:12px; color:color-mix(in srgb, var(--color-text) 50%, transparent)"> · {{ r.company }}</span>
+                </sc-if>
+              </div>
+              <div style="color:color-mix(in srgb, var(--color-text) 78%, transparent)">{{ r.permitType }}</div>
+              <div style="font-variant-numeric:tabular-nums; color:color-mix(in srgb, var(--color-text) 65%, transparent)">{{ r.phone }}</div>
+              <div style="text-align:right; font-variant-numeric:tabular-nums; color:{{ r.countColor }}">{{ r.count }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex; flex-direction:column; gap:8.4px">
+          <sc-for list="{{ rows }}" as="r" hint-placeholder-count="8">
+            <div class="card" style="gap:4px">
+              <div style="display:flex; justify-content:space-between; gap:8.4px; align-items:baseline">
+                <span style="font-family:var(--font-heading); font-weight:500; font-size:15px">{{ r.name }}</span>
+                <span class="tag tag-accent" style="font-variant-numeric:tabular-nums">{{ r.count }}</span>
+              </div>
+              <div style="font-size:12.5px; color:color-mix(in srgb, var(--color-text) 62%, transparent)">{{ r.permitType }}</div>
+              <div style="font-size:12.5px; font-variant-numeric:tabular-nums; color:color-mix(in srgb, var(--color-text) 50%, transparent)">{{ r.phone }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ hasMore }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:16.8px 8.4px; border-top:1px solid var(--color-divider)">
+          <button class="btn btn-secondary" onClick="{{ onMore }}" style="font-size:13px">{{ moreLabel }}</button>
+        </div>
+      </sc-if>
+    </div>
+  </div>
+
+  <div style="flex:none; margin-top:56px; padding:16.8px 22.4px 22.4px">
+    <div style="max-width:1120px; margin:0 auto; display:flex; flex-wrap:wrap; gap:11.2px; justify-content:space-between; font-size:11.5px; color:color-mix(in srgb, var(--color-text) 42%, transparent)">
+      <div>{{ footNote }}</div>
+      <div>by Chano</div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;pageSize&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:40,&quot;min&quot;:10,&quot;max&quot;:200,&quot;step&quot;:10,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Results&quot;}}">
+const CSV_URL = "uploads/Contractors_by_permit_type.csv";
+
+function parseCSV(text) {
+  const rows = [];
+  let row = [], field = "", inQ = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (inQ) {
+      if (c === '"') { if (text[i + 1] === '"') { field += '"'; i++; } else inQ = false; }
+      else field += c;
+    } else if (c === '"') inQ = true;
+    else if (c === ",") { row.push(field); field = ""; }
+    else if (c === "\n") { row.push(field); field = ""; rows.push(row); row = []; }
+    else if (c !== "\r") field += c;
+  }
+  if (field.length || row.length) { row.push(field); rows.push(row); }
+  return rows;
+}
+const KEEP_UPPER = { llc: "LLC", inc: "Inc", "l.l.c.": "LLC", pa: "PA", "a/c": "A/C", ac: "AC", hvac: "HVAC", ii: "II", iii: "III", jr: "Jr", sr: "Sr", usa: "USA", "&": "&", "+": "+" };
+function cleanName(s) {
+  const t = s.trim().replace(/\s+/g, " ");
+  if (!t) return "";
+  if (/[a-z]/.test(t) && /[A-Z]/.test(t)) return t; // already mixed case — leave it alone
+  return t.split(" ").map(w => {
+    const k = w.toLowerCase().replace(/[.,]/g, "");
+    if (KEEP_UPPER[k]) return KEEP_UPPER[k];
+    return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
+  }).join(" ");
+}
+function cleanPhone(s) {
+  const d = String(s).replace(/\D/g, "");
+  if (d.length === 10) return d.slice(0, 3) + "-" + d.slice(3, 6) + "-" + d.slice(6);
+  if (d.length === 11 && d[0] === "1") return d.slice(1, 4) + "-" + d.slice(4, 7) + "-" + d.slice(7);
+  return d ? s.trim() : "—";
+}
+
+class Component extends DCLogic {
+  state = { q: "", aq: "", filtersOpen: false, ptype: "", minCount: "", hasPhone: "", sort: "count", limit: 0, wide: true, data: null, error: "" };
+
+  constructor(props) {
+    super(props);
+    this.searchRef = React.createRef();
+  }
+
+  componentDidMount() {
+    this._resize = () => {
+      const wide = window.innerWidth >= 1040;
+      if (wide !== this.state.wide) this.setState({ wide });
+    };
+    this._resize();
+    window.addEventListener("resize", this._resize);
+
+    fetch(CSV_URL).then(r => {
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return r.text();
+    }).then(text => {
+      const rows = parseCSV(text);
+      const head = rows.shift().map(h => h.trim());
+      const ix = {};
+      head.forEach((h, i) => { ix[h] = i; });
+      const g = (r, k) => (r[ix[k]] || "").trim();
+      const data = [];
+      rows.forEach((r, i) => {
+        const name = cleanName(g(r, "CONTRACTOR_NAME"));
+        if (!name) return;
+        const phoneRaw = g(r, "PHONE");
+        const rec = {
+          id: i,
+          name,
+          company: cleanName(g(r, "COMPANY")),
+          phone: cleanPhone(phoneRaw),
+          hasPhone: !!phoneRaw.replace(/\D/g, ""),
+          permitType: g(r, "PermitType") || "—",
+          count: parseInt(g(r, "COUNT_PAST_365DAYS"), 10) || 0
+        };
+        rec.hay = [rec.name, rec.company, rec.permitType, rec.phone, phoneRaw].join(" ").toLowerCase();
+        data.push(rec);
+      });
+      this.setState({ data });
+    }).catch(e => this.setState({ error: String(e.message || e) }));
+  }
+  componentWillUnmount() { window.removeEventListener("resize", this._resize); }
+
+  set(k) { return e => this.setState({ [k]: e.target.value, limit: 0 }); }
+
+  renderVals() {
+    const st = this.state;
+    const page = this.props.pageSize ?? 40;
+    const data = st.data || [];
+    const terms = st.aq.toLowerCase().split(/\s+/).filter(Boolean);
+    const min = parseInt(st.minCount, 10) || 0;
+    const matches = data.filter(r =>
+      (!st.ptype || r.permitType === st.ptype) &&
+      (!min || r.count >= min) &&
+      (!st.hasPhone || (st.hasPhone === "yes" ? r.hasPhone : !r.hasPhone)) &&
+      terms.every(t => r.hay.indexOf(t) !== -1));
+
+    const sorted = matches.slice().sort((a, b) => {
+      if (st.sort === "name") return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
+      if (st.sort === "type") return a.permitType === b.permitType ? b.count - a.count : (a.permitType < b.permitType ? -1 : 1);
+      return b.count - a.count || (a.name < b.name ? -1 : 1);
+    });
+    const limit = st.limit || page;
+    const shown = sorted.slice(0, limit);
+
+    const chips = [];
+    const chip = (k, label) => { if (st[k]) chips.push({ label, onRemove: () => this.setState({ [k]: "", limit: 0 }) }); };
+    chip("ptype", st.ptype);
+    chip("minCount", st.minCount + "+ permits");
+    chip("hasPhone", st.hasPhone === "yes" ? "Phone on file" : "No phone");
+
+    const ptSet = {};
+    data.forEach(r => { if (r.permitType) ptSet[r.permitType] = 1; });
+
+    const rows = shown.map(r => Object.assign({}, r, {
+      countColor: r.count >= 10 ? "var(--color-accent-300)" : "color-mix(in srgb, var(--color-text) 70%, transparent)"
+    }));
+
+    return {
+      q: st.q, ptype: st.ptype, minCount: st.minCount, hasPhone: st.hasPhone, sort: st.sort,
+      ptypes: Object.keys(ptSet).sort(),
+      searchRef: this.searchRef,
+      heroTop: st.aq || chips.length ? "22.4px" : "6vh",
+      filtersOpen: st.filtersOpen,
+      filtersLabel: chips.length ? "Filters · " + chips.length : "Filters",
+      loadLabel: st.error ? "Could not load the contractor file: " + st.error : (st.data ? "" : "Loading contractor records…"),
+      footNote: st.data
+        ? st.data.length.toLocaleString() + " contractor and permit-type pairings, counted over the past 365 days. Owner-builders are listed as they appear in the permit file."
+        : "Reading the contractor permit extract.",
+      chips, rows,
+      isEmpty: !!st.data && matches.length === 0,
+      isDesktop: st.wide && matches.length > 0,
+      isPhone: !st.wide && matches.length > 0,
+      countLabel: !st.data ? "" :
+        (matches.length === 1 ? "1 contractor" : matches.length.toLocaleString() + " contractors") +
+        " · showing " + shown.length,
+      hasMore: matches.length > shown.length,
+      moreLabel: "Show " + Math.min(page, matches.length - shown.length) + " more",
+      onMore: () => this.setState(s => ({ limit: (s.limit || page) + page })),
+      onQuery: e => this.setState({ q: e.target.value }),
+      onKey: e => { if (e.key === "Enter") this.setState(s => ({ aq: s.q, limit: 0 })); },
+      onSearch: () => this.setState(s => ({ aq: s.q, limit: 0 })),
+      onToggleFilters: () => this.setState(s => ({ filtersOpen: !s.filtersOpen })),
+      onPtype: this.set("ptype"), onMin: this.set("minCount"),
+      onPhone: this.set("hasPhone"), onSort: this.set("sort")
+    };
+  }
+}
+</script>
+</body>
+</html>

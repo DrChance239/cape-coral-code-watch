@@ -1,14 +1,32 @@
 import { createServer } from "node:http";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
-import { existsSync } from "node:fs";
-import { join } from "node:path";
+import { existsSync, readFileSync } from "node:fs";
+import { extname, join, relative, resolve } from "node:path";
 import { CanvasError, createCanvas, joinSession } from "@github/copilot-sdk/extension";
 
 const execFileAsync = promisify(execFile);
 const workspacePath = process.cwd();
 const parquetPath = join(workspacePath, "cases.parquet");
+const publicPath = join(workspacePath, ".github", "extensions", "case-search", "public");
 const servers = new Map();
+const contentTypes = {
+    ".css": "text/css; charset=utf-8",
+    ".csv": "text/csv; charset=utf-8",
+    ".html": "text/html; charset=utf-8",
+    ".js": "text/javascript; charset=utf-8",
+    ".json": "application/json; charset=utf-8",
+};
+
+function staticFile(pathname) {
+    const decodedPath = decodeURIComponent(pathname === "/" ? "/Case Search v2.dc.html" : pathname);
+    const filePath = resolve(publicPath, `.${decodedPath}`);
+    const pathFromPublic = relative(publicPath, filePath);
+    if (pathFromPublic.startsWith("..") || pathFromPublic === "" || !existsSync(filePath)) {
+        return null;
+    }
+    return filePath;
+}
 
 const PYTHON_QUERY = String.raw`
 import json
@@ -327,9 +345,10 @@ function renderHtml(initialQuery) {
 async function startServer(initialQuery) {
     const server = createServer(async (request, response) => {
         const url = new URL(request.url, "http://127.0.0.1");
-        if (request.method === "GET" && url.pathname === "/") {
-            response.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
-            response.end(renderHtml(initialQuery));
+        const filePath = request.method === "GET" ? staticFile(url.pathname) : null;
+        if (filePath) {
+            response.writeHead(200, { "Content-Type": contentTypes[extname(filePath)] ?? "application/octet-stream" });
+            response.end(readFileSync(filePath));
             return;
         }
 
@@ -422,7 +441,10 @@ await joinSession({
                     entry = await startServer(ctx.input?.query ?? "");
                     servers.set(ctx.instanceId, entry);
                 }
-                return { title: "Cape Coral Case Search", url: entry.url };
+                return {
+                    title: "Cape Coral Case Search",
+                    url: `${entry.url}Case%20Search%20v2.dc.html`,
+                };
             },
             onClose: async (ctx) => {
                 const entry = servers.get(ctx.instanceId);
