@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/nocturne-5223f3d0-36d8-45ce-9356-2ac9c8ce1793/styles.css">
+<script src="_ds/nocturne-5223f3d0-36d8-45ce-9356-2ac9c8ce1793/_ds_bundle.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap">
+<style>
+  body { margin: 0; background: #161826; }
+  a { color: var(--color-accent); text-decoration: none; }
+  a:hover { color: var(--color-accent-400); text-decoration: underline; }
+</style>
+</helmet>
+<div style="min-height:100vh; display:flex; flex-direction:column; background:var(--color-bg); color:var(--color-text); font-family:var(--font-body); font-size:14px">
+
+  <div style="flex:1; width:100%; max-width:1120px; margin:0 auto; padding:0 22.4px; box-sizing:border-box">
+
+    <div style="display:flex; flex-wrap:wrap; gap:16.8px; padding:16.8px 0 0; font-size:12.5px">
+      <a href="Case Search v2.dc.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Code enforcement cases</a>
+      <a href="Officers.dc.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Officers</a>
+      <a href="Planning Projects.dc.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Planning projects</a>
+      <a href="Contractors.dc.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Contractors</a>
+      <a href="Building Permits.dc.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Building permits</a>
+      <span style="color:var(--color-accent-300)">Inspections</span>
+      <a href="Parcel Map.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Parcel map</a>
+      <a href="Public Works.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Public works</a>
+      <a href="City Salaries.dc.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Salaries</a>
+    </div>
+
+    <div style="margin-top:{{ heroTop }}; transition:margin-top 220ms ease">
+      <div style="display:flex; align-items:baseline; gap:8.4px; flex-wrap:wrap">
+        <h1 style="font-size:26px; margin:0; letter-spacing:-0.02em">Cape Coral Inspections</h1>
+        <span class="tag tag-outline" style="align-self:center">Live</span>
+      </div>
+      <p style="margin:8.4px 0 16.8px; font-size:14.5px; line-height:1.55; max-width:640px; color:color-mix(in srgb, var(--color-text) 68%, transparent); text-wrap:pretty">Every inspection the city has scheduled or completed — {{ totalLabel }} of them. Because the file is that large, start with a permit number, an address, a parcel, or an inspector's name.</p>
+
+      <div style="display:flex; flex-wrap:wrap; gap:8.4px; align-items:center; max-width:760px">
+        <div style="position:relative; display:flex; align-items:center; flex:1; min-width:240px">
+          <svg width="17" height="17" viewBox="0 0 256 256" fill="currentColor" style="position:absolute; left:11px; opacity:0.4; pointer-events:none"><path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"></path></svg>
+          <input class="input" ref="{{ searchRef }}" value="{{ q }}" onChange="{{ onQuery }}" onKeyDown="{{ onKey }}" placeholder="B21-10454, 1932 SE 21st Ter, 294424C3053760450, tie beam…" style="width:100%; padding:11.2px 11.2px 11.2px 36px; font-size:15px">
+        </div>
+        <button class="btn btn-primary" onClick="{{ onSearch }}" style="padding:11.2px 22.4px; font-size:14.5px">Search</button>
+      </div>
+
+      <div style="display:flex; flex-wrap:wrap; gap:5.6px; align-items:center; margin-top:11.2px; min-height:30px">
+        <button class="btn btn-secondary" onClick="{{ onToggleFilters }}" style="font-size:13px; gap:7px">
+          <svg width="14" height="14" viewBox="0 0 256 256" fill="currentColor"><path d="M40,88H73a32,32,0,0,0,62,0h81a8,8,0,0,0,0-16H135a32,32,0,0,0-62,0H40a8,8,0,0,0,0,16Zm64-24a16,16,0,1,1-16,16A16,16,0,0,1,104,64ZM216,168H199a32,32,0,0,0-62,0H40a8,8,0,0,0,0,16h97a32,32,0,0,0,62,0h17a8,8,0,0,0,0-16Zm-48,24a16,16,0,1,1,16-16A16,16,0,0,1,168,192Z"></path></svg>
+          {{ filtersLabel }}
+        </button>
+        <sc-for list="{{ chips }}" as="c" hint-placeholder-count="0">
+          <button class="tag tag-accent" onClick="{{ c.onRemove }}" style="border:0; cursor:pointer; font-family:var(--font-body); gap:7px">{{ c.label }} <span style="opacity:0.55">✕</span></button>
+        </sc-for>
+        <span style="font-size:12px; color:color-mix(in srgb, var(--color-text) 45%, transparent); margin-left:5.6px">{{ loadLabel }}</span>
+      </div>
+
+      <sc-if value="{{ filtersOpen }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-top:11.2px; padding:16.8px; border-radius:8px; background:var(--color-surface); box-shadow:var(--shadow-sm); display:flex; flex-wrap:wrap; gap:11.2px">
+          <label class="field" style="display:flex; flex-direction:column; gap:4px; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:color-mix(in srgb, var(--color-text) 55%, transparent)">Result
+            <select class="input" value="{{ result }}" onChange="{{ onResult }}" style="padding:5.6px 8.4px; font-size:13px; max-width:260px; text-transform:none; letter-spacing:0; color:var(--color-text)">
+              <option value="">Any result</option>
+              <sc-for list="{{ results }}" as="r" hint-placeholder-count="6"><option value="{{ r }}">{{ r }}</option></sc-for>
+            </select>
+          </label>
+          <label class="field" style="display:flex; flex-direction:column; gap:4px; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:color-mix(in srgb, var(--color-text) 55%, transparent)">Module
+            <select class="input" value="{{ module }}" onChange="{{ onModule }}" style="padding:5.6px 8.4px; font-size:13px; max-width:260px; text-transform:none; letter-spacing:0; color:var(--color-text)">
+              <option value="">Any module</option>
+              <sc-for list="{{ modules }}" as="m" hint-placeholder-count="4"><option value="{{ m }}">{{ m }}</option></sc-for>
+            </select>
+          </label>
+          <label class="field" style="display:flex; flex-direction:column; gap:4px; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:color-mix(in srgb, var(--color-text) 55%, transparent)">Year scheduled
+            <select class="input" value="{{ year }}" onChange="{{ onYear }}" style="padding:5.6px 8.4px; font-size:13px; text-transform:none; letter-spacing:0; color:var(--color-text)">
+              <option value="">Any year</option>
+              <sc-for list="{{ years }}" as="y" hint-placeholder-count="8"><option value="{{ y }}">{{ y }}</option></sc-for>
+            </select>
+          </label>
+          <label class="field" style="display:flex; flex-direction:column; gap:4px; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:color-mix(in srgb, var(--color-text) 55%, transparent)">Sort
+            <select class="input" value="{{ sort }}" onChange="{{ onSort }}" style="padding:5.6px 8.4px; font-size:13px; text-transform:none; letter-spacing:0; color:var(--color-text)">
+              <option value="scheduled_date DESC">Scheduled, newest</option>
+              <option value="scheduled_date ASC">Scheduled, oldest</option>
+              <option value="completed_date DESC">Completed, newest</option>
+            </select>
+          </label>
+        </div>
+      </sc-if>
+    </div>
+
+    <sc-if value="{{ searched }}" hint-placeholder-val="{{ false }}">
+      <div style="margin-top:22.4px">
+        <div style="font-size:12.5px; color:color-mix(in srgb, var(--color-text) 58%, transparent); margin-bottom:8.4px">{{ countLabel }}</div>
+
+        <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:48px 0; font-size:15px; color:color-mix(in srgb, var(--color-text) 60%, transparent)">Nothing matched that search.</div>
+        </sc-if>
+
+        <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+          <div>
+            <div style="display:grid; grid-template-columns:136px minmax(180px,1fr) 216px 152px 108px 108px; gap:11.2px; padding:0 8.4px 8.4px; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:color-mix(in srgb, var(--color-text) 55%, transparent)">
+              <div>Permit</div><div>Address</div><div>Inspection</div><div>Result</div><div>Scheduled</div><div>Completed</div>
+            </div>
+            <sc-for list="{{ rows }}" as="r" hint-placeholder-count="12">
+              <div style="border-top:1px solid var(--color-divider)">
+                <div onClick="{{ r.onToggle }}" style="display:grid; grid-template-columns:136px minmax(180px,1fr) 216px 152px 108px 108px; gap:11.2px; padding:9px 8.4px; cursor:pointer; font-size:13.5px; background:{{ r.bg }}">
+                  <div style="font-variant-numeric:tabular-nums; color:var(--color-accent-300)">{{ r.permitNo }}</div>
+                  <div>{{ r.address }}</div>
+                  <div style="color:color-mix(in srgb, var(--color-text) 78%, transparent)">{{ r.inspectionType }}</div>
+                  <div><span class="tag {{ r.resultTag }}">{{ r.result }}</span></div>
+                  <div style="font-variant-numeric:tabular-nums; color:color-mix(in srgb, var(--color-text) 65%, transparent)">{{ r.scheduled }}</div>
+                  <div style="font-variant-numeric:tabular-nums; color:color-mix(in srgb, var(--color-text) 65%, transparent)">{{ r.completed }}</div>
+                </div>
+                <sc-if value="{{ r.open }}" hint-placeholder-val="{{ false }}">
+                  <div style="padding:5.6px 8.4px 16.8px">
+                    <div style="display:grid; grid-template-columns:112px 1fr; gap:5.6px 11.2px; font-size:12.5px; align-items:baseline; max-width:640px">
+                      <div style="color:color-mix(in srgb, var(--color-text) 50%, transparent)">Inspector</div><div>{{ r.inspector }}</div>
+                      <div style="color:color-mix(in srgb, var(--color-text) 50%, transparent)">Parcel (STRAP)</div><div style="font-variant-numeric:tabular-nums">{{ r.strap }}</div>
+                      <div style="color:color-mix(in srgb, var(--color-text) 50%, transparent)">Module</div><div>{{ r.module }}</div>
+                      <div style="color:color-mix(in srgb, var(--color-text) 50%, transparent)">Scheduled via</div><div>{{ r.via }}</div>
+                      <div style="color:color-mix(in srgb, var(--color-text) 50%, transparent)">Record created</div><div style="font-variant-numeric:tabular-nums">{{ r.created }}</div>
+                    </div>
+                    <div style="margin-top:11.2px">
+                      <button class="btn btn-ghost" onClick="{{ r.onPermit }}" style="font-size:12.5px">All inspections on {{ r.permitNo }}</button>
+                    </div>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex; flex-direction:column; gap:8.4px">
+            <sc-for list="{{ rows }}" as="r" hint-placeholder-count="8">
+              <div class="card" onClick="{{ r.onToggle }}" style="cursor:pointer; gap:5.6px">
+                <div style="display:flex; justify-content:space-between; gap:8.4px; align-items:baseline">
+                  <span style="font-size:12.5px; font-variant-numeric:tabular-nums; color:var(--color-accent-300)">{{ r.permitNo }}</span>
+                  <span class="tag {{ r.resultTag }}">{{ r.result }}</span>
+                </div>
+                <div style="font-family:var(--font-heading); font-weight:500; font-size:16px">{{ r.address }}</div>
+                <div style="font-size:12.5px; color:color-mix(in srgb, var(--color-text) 62%, transparent)">{{ r.inspectionType }}</div>
+                <div style="font-size:12px; font-variant-numeric:tabular-nums; color:color-mix(in srgb, var(--color-text) 48%, transparent)">{{ r.dateLine }}</div>
+                <sc-if value="{{ r.open }}" hint-placeholder-val="{{ false }}">
+                  <div style="margin-top:5.6px; display:flex; flex-direction:column; gap:4px; font-size:12.5px; color:color-mix(in srgb, var(--color-text) 60%, transparent)">
+                    <div>Inspector {{ r.inspector }}</div>
+                    <div style="font-variant-numeric:tabular-nums">Parcel {{ r.strap }}</div>
+                    <div>{{ r.module }} · {{ r.via }}</div>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ hasMore }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:16.8px 8.4px; border-top:1px solid var(--color-divider)">
+            <button class="btn btn-secondary" onClick="{{ onMore }}" style="font-size:13px">{{ moreLabel }}</button>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+  </div>
+
+  <div style="flex:none; margin-top:56px; padding:16.8px 22.4px 22.4px">
+    <div style="max-width:1120px; margin:0 auto; display:flex; flex-wrap:wrap; gap:11.2px; justify-content:space-between; font-size:11.5px; color:color-mix(in srgb, var(--color-text) 42%, transparent)">
+      <div>Live query against the City of Cape Coral open-data inspections table.</div>
+      <div>by Chano</div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{}">
+const SERVICE = "https://capeims.capecoral.gov/arcgis/rest/services/OpenData/OpenData/MapServer/7";
+const OUT = "OBJECTID,Module,permit_no,strap,site_addr,scheduled_via,inspection_type,inspector,scheduled_date,completed_date,result,CREATEDATE,created_by";
+const TEXT_FIELDS = ["permit_no","strap","site_addr","inspection_type","inspector","result"];
+const MONTH = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const PAGE = 30;
+
+function url(params) {
+  return SERVICE + "/query?" + Object.keys(params).map(k => k + "=" + encodeURIComponent(params[k])).join("&");
+}
+function esc(s) { return String(s).replace(/'/g, "''"); }
+function fmtDate(ms) {
+  if (!ms) return "";
+  const d = new Date(ms);
+  return MONTH[d.getMonth()] + " " + String(d.getDate()).padStart(2, "0") + ", " + d.getFullYear();
+}
+function tagFor(s) {
+  const v = String(s || "").toLowerCase();
+  if (v.indexOf("pass") !== -1 || v.indexOf("approved") !== -1 || v.indexOf("complete") !== -1) return "tag-neutral";
+  if (v.indexOf("fail") !== -1 || v.indexOf("denied") !== -1 || v.indexOf("cancel") !== -1) return "tag-outline";
+  return "tag-accent";
+}
+function tidyAddr(s) {
+  const t = String(s || "").trim().replace(/^(\d+)([A-Za-z])/, "$1 $2").replace(/\s+/g, " ");
+  return t || "No site address on record";
+}
+
+class Component extends DCLogic {
+  state = {
+    q: "", aq: "", result: "", module: "", year: "", sort: "scheduled_date DESC",
+    filtersOpen: false, openId: null, wide: true, searched: false,
+    rows: [], total: null, loading: false, error: "", grandTotal: null,
+    results: [], modules: []
+  };
+
+  constructor(props) {
+    super(props);
+    this.searchRef = React.createRef();
+    this.token = 0;
+  }
+
+  componentDidMount() {
+    this._resize = () => {
+      const wide = window.innerWidth >= 1040;
+      if (wide !== this.state.wide) this.setState({ wide });
+    };
+    this._resize();
+    window.addEventListener("resize", this._resize);
+    this._key = e => { if (e.key === "Escape") this.setState({ openId: null }); };
+    window.addEventListener("keydown", this._key);
+
+    this.distinct("result", "results");
+    this.distinct("Module", "modules");
+    fetch(url({ where: "1=1", returnCountOnly: "true", f: "json" }))
+      .then(r => r.json())
+      .then(j => this.setState({ grandTotal: j.count }))
+      .catch(() => {});
+  }
+  componentWillUnmount() {
+    window.removeEventListener("resize", this._resize);
+    window.removeEventListener("keydown", this._key);
+  }
+
+  distinct(field, key) {
+    fetch(url({ where: field + " IS NOT NULL", outFields: field, returnDistinctValues: "true", orderByFields: field, f: "json" }))
+      .then(r => r.json())
+      .then(j => {
+        const vals = (j.features || []).map(f => f.attributes[field]).filter(v => v && String(v).trim());
+        this.setState({ [key]: vals });
+      }).catch(() => {});
+  }
+
+  where() {
+    const st = this.state;
+    const clauses = [];
+    st.aq.trim().split(/\s+/).filter(Boolean).forEach(t => {
+      const v = esc(t.toUpperCase());
+      clauses.push("(" + TEXT_FIELDS.map(f => "UPPER(" + f + ") LIKE '%" + v + "%'").join(" OR ") + ")");
+    });
+    if (st.result) clauses.push("result = '" + esc(st.result) + "'");
+    if (st.module) clauses.push("Module = '" + esc(st.module) + "'");
+    if (st.year) clauses.push("scheduled_date >= date '" + st.year + "-01-01' AND scheduled_date < date '" + (+st.year + 1) + "-01-01'");
+    return clauses.length ? clauses.join(" AND ") : "1=1";
+  }
+
+  run(reset) {
+    const my = ++this.token;
+    const offset = reset ? 0 : this.state.rows.length;
+    const where = this.where();
+    this.setState({ loading: true, error: "", searched: true, openId: reset ? null : this.state.openId });
+
+    if (reset) {
+      fetch(url({ where, returnCountOnly: "true", f: "json" }))
+        .then(r => r.json())
+        .then(j => { if (my === this.token) this.setState({ total: typeof j.count === "number" ? j.count : null }); })
+        .catch(() => {});
+    }
+
+    fetch(url({ where, outFields: OUT, orderByFields: this.state.sort, resultOffset: offset, resultRecordCount: PAGE, returnGeometry: "false", f: "json" }))
+      .then(r => r.json())
+      .then(j => {
+        if (my !== this.token) return;
+        if (j.error) throw new Error(j.error.message || "service error");
+        const recs = (j.features || []).map(f => {
+          const a = f.attributes;
+          return {
+            id: a.OBJECTID,
+            permitNo: (a.permit_no || "—").trim(),
+            address: tidyAddr(a.site_addr),
+            inspectionType: (a.inspection_type || "—").trim(),
+            result: (a.result || "—").trim(),
+            resultTag: tagFor(a.result),
+            scheduled: fmtDate(a.scheduled_date) || "—",
+            completed: fmtDate(a.completed_date) || "—",
+            dateLine: "Scheduled " + (fmtDate(a.scheduled_date) || "—") + (a.completed_date ? " · completed " + fmtDate(a.completed_date) : ""),
+            inspector: (a.inspector || "").trim() || "Not assigned",
+            strap: (a.strap || "").trim() || "—",
+            module: (a.Module || "—").trim(),
+            via: (a.scheduled_via || "").trim() || "—",
+            created: fmtDate(a.CREATEDATE) || "—"
+          };
+        });
+        this.setState(s => ({ rows: reset ? recs : s.rows.concat(recs), loading: false }));
+      })
+      .catch(e => { if (my === this.token) this.setState({ loading: false, error: String(e.message || e) }); });
+  }
+
+  set(k) {
+    return e => this.setState({ [k]: e.target.value }, () => { if (this.state.searched) this.run(true); });
+  }
+
+  renderVals() {
+    const st = this.state;
+    const chips = [];
+    const chip = (k, label) => { if (st[k]) chips.push({ label, onRemove: () => this.setState({ [k]: "" }, () => this.state.searched && this.run(true)) }); };
+    chip("result", st.result);
+    chip("module", st.module);
+    chip("year", "Scheduled " + st.year);
+
+    const years = [];
+    for (let y = 2027; y >= 2006; y--) years.push(String(y));
+
+    const rows = st.rows.map(r => Object.assign({}, r, {
+      open: st.openId === r.id,
+      bg: st.openId === r.id ? "color-mix(in srgb, var(--color-accent) 10%, transparent)" : "transparent",
+      onToggle: () => this.setState(s => ({ openId: s.openId === r.id ? null : r.id })),
+      onPermit: () => this.setState({ q: r.permitNo, aq: r.permitNo, result: "", module: "", year: "" }, () => this.run(true))
+    }));
+
+    return {
+      q: st.q, result: st.result, module: st.module, year: st.year, sort: st.sort,
+      results: st.results, modules: st.modules, years,
+      searchRef: this.searchRef,
+      heroTop: st.searched ? "22.4px" : "7vh",
+      totalLabel: st.grandTotal ? st.grandTotal.toLocaleString() : "over four million",
+      filtersOpen: st.filtersOpen,
+      filtersLabel: chips.length ? "Filters · " + chips.length : "Filters",
+      loadLabel: st.error ? "Inspection service error: " + st.error : (st.loading ? "Querying the inspections table…" : ""),
+      chips, rows,
+      searched: st.searched,
+      isEmpty: st.searched && !st.loading && !st.error && st.rows.length === 0,
+      isDesktop: st.wide && rows.length > 0,
+      isPhone: !st.wide && rows.length > 0,
+      countLabel: st.error || st.total === null ? "" :
+        (st.total === 1 ? "1 inspection" : st.total.toLocaleString() + " inspections") + " · showing " + rows.length,
+      hasMore: st.total !== null && rows.length > 0 && rows.length < st.total,
+      moreLabel: st.loading ? "Loading…" : "Show " + PAGE + " more",
+      onMore: () => this.run(false),
+      onQuery: e => this.setState({ q: e.target.value }),
+      onKey: e => { if (e.key === "Enter") this.setState(s => ({ aq: s.q }), () => this.run(true)); },
+      onSearch: () => this.setState(s => ({ aq: s.q }), () => this.run(true)),
+      onToggleFilters: () => this.setState(s => ({ filtersOpen: !s.filtersOpen })),
+      onResult: this.set("result"), onModule: this.set("module"),
+      onYear: this.set("year"), onSort: this.set("sort")
+    };
+  }
+}
+</script>
+</body>
+</html>

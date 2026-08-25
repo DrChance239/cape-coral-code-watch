@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cape Coral Parcel Map — utilities, zoning, ownership</title>
+<link rel="stylesheet" href="_ds/nocturne-5223f3d0-36d8-45ce-9356-2ac9c8ce1793/styles.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha384-sHL9NAb7lN7rfvG5lfHpm643Xkcjzp4jFvuavGOndn6pjVqS6ny56CAt3nsEVT4H" crossorigin="anonymous">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha384-cxOPjt7s7Iz04uaHJceBmS+qpjv2JkIHNVcuOrM+YHwZOmJGBXI00mdUXEq65HTH" crossorigin="anonymous"></script>
+<style>
+  body { margin: 0; background: var(--color-bg); color: var(--color-text); font-family: var(--font-body); font-size: 14px; }
+  a { color: var(--color-accent); text-decoration: none; }
+  a:hover { color: var(--color-accent-400); text-decoration: underline; }
+  .leaflet-container { background: #10111c; font-family: var(--font-body); }
+  .leaflet-tile-pane { filter: grayscale(0.55) brightness(0.7) contrast(1.08); }
+  .leaflet-control-attribution { background: rgba(22,24,38,0.82) !important; color: color-mix(in srgb, var(--color-text) 55%, transparent) !important; font-size: 10px !important; }
+  .leaflet-control-attribution a { color: var(--color-accent-300) !important; }
+  .leaflet-bar a { background: var(--color-surface) !important; color: var(--color-text) !important; border-color: #3f424d !important; }
+  .leaflet-bar a:hover { background: var(--color-neutral-800) !important; }
+  .row { display: grid; grid-template-columns: 116px 1fr; gap: 5.6px 11.2px; align-items: baseline; font-size: 12.5px; }
+  .lbl { color: color-mix(in srgb, var(--color-text) 50%, transparent); }
+  .num { font-variant-numeric: tabular-nums; }
+  .sec { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-accent); margin: 16.8px 0 5.6px; }
+  .hit { padding: 8.4px 11.2px; cursor: pointer; font-size: 13px; border-top: 1px solid var(--color-divider); }
+  .hit:hover { background: color-mix(in srgb, var(--color-accent) 12%, transparent); }
+  #split { display: flex; }
+  #map { flex: 1; min-width: 0; }
+  #panel { flex: none; width: 400px; max-width: 44vw; overflow-y: auto; }
+  @media (max-width: 900px) {
+    #split { flex-direction: column; }
+    #map { flex: none; height: 55vh; width: 100%; }
+    #panel { width: auto; max-width: none; flex: 1; min-height: 0; }
+  }
+</style>
+</head>
+<body>
+<div style="display:flex; flex-direction:column; height:100vh; overflow:hidden">
+
+  <div style="flex:none; padding:16.8px 22.4px 11.2px">
+    <div style="display:flex; flex-wrap:wrap; gap:16.8px; font-size:12.5px; margin-bottom:11.2px">
+      <a href="Case Search v2.dc.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Code enforcement cases</a>
+      <a href="Officers.dc.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Officers</a>
+      <a href="Planning Projects.dc.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Planning projects</a>
+      <a href="Contractors.dc.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Contractors</a>
+      <a href="Building Permits.dc.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Building permits</a>
+      <a href="Inspections.dc.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Inspections</a>
+      <span style="color:var(--color-accent-300)">Parcel map</span>
+      <a href="Public Works.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Public works</a>
+      <a href="City Salaries.dc.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Salaries</a>
+    </div>
+
+    <div style="display:flex; flex-wrap:wrap; gap:16.8px; align-items:flex-end; justify-content:space-between">
+      <div>
+        <div style="display:flex; align-items:baseline; gap:8.4px; flex-wrap:wrap">
+          <h1 style="font-size:24px; margin:0; letter-spacing:-0.02em">Parcel Map &amp; Utility Forecaster</h1>
+          <span class="tag tag-outline" style="align-self:center">Live</span>
+        </div>
+        <p style="margin:5.6px 0 0; font-size:13.5px; max-width:620px; line-height:1.5; color:color-mix(in srgb, var(--color-text) 65%, transparent); text-wrap:pretty">Click any parcel — or search an address — to see who owns it, how it's zoned, and exactly where it stands on city water, sewer and irrigation, including whether connection is mandatory.</p>
+      </div>
+      <div style="position:relative; min-width:280px; flex:1; max-width:420px">
+        <input id="q" class="input" autocomplete="off" placeholder="Search an address, e.g. 4934 SW 20th Pl" style="width:100%; padding:9px 11.2px; font-size:14px">
+        <div id="hits" style="display:none; position:absolute; z-index:900; left:0; right:0; top:calc(100% + 4px); border-radius:8px; overflow:hidden; background:var(--color-surface); box-shadow:var(--shadow-md); max-height:280px; overflow-y:auto"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="split" style="flex:1; min-height:0">
+    <div id="map"></div>
+    <div id="panel" style="padding:16.8px 22.4px 33.6px; background:var(--color-surface); box-shadow:var(--shadow-sm)">
+      <div style="font-size:13.5px; line-height:1.6; color:color-mix(in srgb, var(--color-text) 55%, transparent); text-wrap:pretty">
+        Pick a parcel on the map to load its record.
+        <div class="sec">What you'll see</div>
+        Owner and mailing name, STRAP, zoning and future land use, council district, assessed value, and the water / sewer / irrigation availability dates that drive UEP assessments.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const OWN = "https://capeims.capecoral.gov/arcgis/rest/services/OpenData/OpenData/MapServer/12";
+const FIELDS = ["Strap","Site_Address","City","Zip","Owner_Name","OwnerOthers","Zoning","Future_Land_Use","Council_District","Assessed","Land","Building","Sale1Amount","Sale1Date","Improved","Acres","Legal","Canal","garbageday","WATERDESC","SEWERDESC","IRRIGATIONDESC","w_srv_avail","s_srv_avail","i_srv_avail","water_avail_date","sewer_avail_date","irrigation_avail_date","mandatory_connection","Well_Restriction","SeaWall","Lat","Lon"].join(",");
+const MONTH = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+const map = L.map("map", { zoomControl: true, center: [26.5765, -81.9498], zoom: 12 });
+L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  attribution: '© OpenStreetMap contributors · parcels: City of Cape Coral',
+  maxZoom: 19
+}).addTo(map);
+
+let selLayer = null;
+const panel = document.getElementById("panel");
+
+function esc(s) { return String(s).replace(/'/g, "''"); }
+function q(params) {
+  return OWN + "/query?" + Object.keys(params).map(k => k + "=" + encodeURIComponent(params[k])).join("&");
+}
+function money(v) {
+  const n = Number(v);
+  return n ? "$" + n.toLocaleString() : "—";
+}
+function dt(v) {
+  if (!v) return "";
+  const d = new Date(Number(v));
+  if (isNaN(d)) return String(v);
+  return MONTH[d.getMonth()] + " " + String(d.getDate()).padStart(2, "0") + ", " + d.getFullYear();
+}
+function val(v) {
+  const s = (v === null || v === undefined) ? "" : String(v).trim();
+  return s || "—";
+}
+function yn(v) {
+  const s = String(v || "").trim().toUpperCase();
+  if (s === "Y" || s === "YES" || s === "1" || s === "TRUE") return "Yes";
+  if (s === "N" || s === "NO" || s === "0" || s === "FALSE") return "No";
+  return s ? s : "—";
+}
+
+/* one utility row: availability + the date it lands */
+function utility(label, desc, avail, date) {
+  const a = yn(avail);
+  const tone = a === "Yes" ? "var(--color-accent-300)" : "color-mix(in srgb, var(--color-text) 70%, transparent)";
+  const when = dt(date);
+  const detail = [val(desc) !== "—" ? val(desc) : "", when ? "available " + when : ""].filter(Boolean).join(" · ");
+  return '<div class="lbl">' + label + '</div><div><span style="color:' + tone + '">' + a + '</span>'
+    + (detail ? ' <span style="color:color-mix(in srgb, var(--color-text) 50%, transparent)">' + detail + '</span>' : '') + '</div>';
+}
+
+function render(a) {
+  const addr = val(a.Site_Address);
+  const tidyOwner = v => val(v).replace(/[\s+&,]+$/, "").trim();
+  const owners = [tidyOwner(a.Owner_Name), tidyOwner(a.OwnerOthers)].filter(v => v && v !== "—");
+  const mand = yn(a.mandatory_connection);
+  const mandTone = mand === "Yes" ? "tag-accent" : "tag-neutral";
+  panel.innerHTML =
+    '<div style="font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--color-accent)">Parcel</div>'
+    + '<div style="font-family:var(--font-heading); font-weight:500; font-size:21px; letter-spacing:-0.015em; margin:2px 0 5.6px">' + addr + '</div>'
+    + '<div style="display:flex; flex-wrap:wrap; gap:5.6px; align-items:center; margin-bottom:16.8px">'
+      + '<span class="tag ' + mandTone + '" style="white-space:nowrap">Mandatory connection: ' + mand + '</span>'
+      + '<span style="font-size:12px; color:color-mix(in srgb, var(--color-text) 50%, transparent)" class="num">' + val(a.Strap) + '</span>'
+    + '</div>'
+
+    + '<div class="sec">Utilities</div><div class="row">'
+      + utility("Water", a.WATERDESC, a.w_srv_avail, a.water_avail_date)
+      + utility("Sewer", a.SEWERDESC, a.s_srv_avail, a.sewer_avail_date)
+      + utility("Irrigation", a.IRRIGATIONDESC, a.i_srv_avail, a.irrigation_avail_date)
+      + '<div class="lbl">Well restriction</div><div>' + yn(a.Well_Restriction) + '</div>'
+    + '</div>'
+
+    + '<div class="sec">Ownership</div><div class="row">'
+      + '<div class="lbl">Owner</div><div>' + (owners.join(" + ") || "—") + '</div>'
+      + '<div class="lbl">Assessed</div><div class="num">' + money(a.Assessed) + '</div>'
+      + '<div class="lbl">Land / building</div><div class="num">' + money(a.Land) + ' / ' + money(a.Building) + '</div>'
+      + '<div class="lbl">Last sale</div><div class="num">' + (Number(a.Sale1Amount) ? money(a.Sale1Amount) + (dt(a.Sale1Date) ? " · " + dt(a.Sale1Date) : "") : "—") + '</div>'
+      + '<div class="lbl">Improved</div><div>' + yn(a.Improved) + '</div>'
+    + '</div>'
+
+    + '<div class="sec">Land use</div><div class="row">'
+      + '<div class="lbl">Zoning</div><div>' + val(a.Zoning) + '</div>'
+      + '<div class="lbl">Future land use</div><div>' + val(a.Future_Land_Use) + '</div>'
+      + '<div class="lbl">Council district</div><div class="num">' + val(a.Council_District) + '</div>'
+      + '<div class="lbl">Acres</div><div class="num">' + (a.Acres ? Number(a.Acres).toFixed(3) : "—") + '</div>'
+      + '<div class="lbl">Canal</div><div>' + val(a.Canal) + '</div>'
+      + '<div class="lbl">Seawall</div><div>' + yn(a.SeaWall) + '</div>'
+      + '<div class="lbl">Garbage day</div><div>' + val(a.garbageday) + '</div>'
+      + '<div class="lbl">City / zip</div><div>' + val(a.City) + ' ' + (val(a.Zip) === "—" ? "" : val(a.Zip)) + '</div>'
+    + '</div>'
+
+    + '<div class="sec">Legal</div>'
+    + '<div style="font-size:12.5px; line-height:1.55; color:color-mix(in srgb, var(--color-text) 72%, transparent)">' + val(a.Legal) + '</div>'
+
+    + '<div class="sec">Look this parcel up elsewhere</div>'
+    + '<div style="display:flex; flex-wrap:wrap; gap:5.6px">'
+      + '<a class="btn btn-secondary" style="font-size:12.5px" href="Case Search v2.dc.html">Code cases</a>'
+      + '<a class="btn btn-secondary" style="font-size:12.5px" href="Building Permits.dc.html">Permits</a>'
+      + '<a class="btn btn-secondary" style="font-size:12.5px" href="Inspections.dc.html">Inspections</a>'
+    + '</div>'
+    + '<div style="margin-top:8.4px; font-size:11.5px; color:color-mix(in srgb, var(--color-text) 42%, transparent)">Search those pages for <span class="num">' + (val(a.Strap) !== "—" ? val(a.Strap) : addr) + '</span>.</div>';
+}
+
+function show(geojson) {
+  if (selLayer) { map.removeLayer(selLayer); selLayer = null; }
+  if (!geojson || !geojson.features || !geojson.features.length) return null;
+  const f = geojson.features[0];
+  selLayer = L.geoJSON(f, {
+    style: { color: "#9184d9", weight: 2, fillColor: "#9184d9", fillOpacity: 0.22 }
+  }).addTo(map);
+  render(f.properties || {});
+  return selLayer;
+}
+
+function loading(msg) {
+  panel.innerHTML = '<div style="font-size:13.5px; color:color-mix(in srgb, var(--color-text) 55%, transparent)">' + msg + '</div>';
+}
+function failed(msg) {
+  panel.innerHTML = '<div style="font-size:13.5px; color:color-mix(in srgb, var(--color-text) 70%, transparent)">' + msg + '</div>';
+}
+
+map.on("click", e => {
+  loading("Reading the parcel at that point…");
+  const geom = e.latlng.lng + "," + e.latlng.lat;
+  fetch(q({
+    geometry: geom, geometryType: "esriGeometryPoint", inSR: "4326", outSR: "4326",
+    spatialRel: "esriSpatialRelIntersects", outFields: FIELDS,
+    returnGeometry: "true", resultRecordCount: 1, f: "geojson"
+  }))
+    .then(r => r.json())
+    .then(gj => {
+      if (!gj.features || !gj.features.length) { failed("No parcel at that point — try clicking inside a lot."); return; }
+      show(gj);
+    })
+    .catch(err => failed("Could not reach the parcel service: " + err.message));
+});
+
+/* address type-ahead */
+const input = document.getElementById("q");
+const hits = document.getElementById("hits");
+let timer = null, token = 0;
+
+function closeHits() { hits.style.display = "none"; hits.innerHTML = ""; }
+
+input.addEventListener("input", () => {
+  const text = input.value.trim();
+  clearTimeout(timer);
+  if (text.length < 3) { closeHits(); return; }
+  timer = setTimeout(() => {
+    const my = ++token;
+    const terms = text.split(/\s+/).filter(Boolean)
+      .map(t => "UPPER(Site_Address) LIKE '%" + esc(t.toUpperCase()) + "%'").join(" AND ");
+    fetch(q({ where: terms, outFields: "Strap,Site_Address,Owner_Name,Zoning", orderByFields: "Site_Address", resultRecordCount: 8, returnGeometry: "false", f: "json" }))
+      .then(r => r.json())
+      .then(j => {
+        if (my !== token) return;
+        const rows = (j.features || []).map(f => f.attributes);
+        if (!rows.length) { closeHits(); return; }
+        hits.innerHTML = rows.map(a =>
+          '<div class="hit" data-strap="' + (a.Strap || "") + '">'
+          + '<div>' + val(a.Site_Address) + '</div>'
+          + '<div style="font-size:11.5px; color:color-mix(in srgb, var(--color-text) 48%, transparent)">' + val(a.Owner_Name) + (a.Zoning ? " · " + a.Zoning : "") + '</div>'
+          + '</div>').join("");
+        hits.style.display = "block";
+        Array.prototype.forEach.call(hits.querySelectorAll(".hit"), el => {
+          el.addEventListener("mousedown", () => {
+            const strap = el.getAttribute("data-strap");
+            closeHits();
+            input.value = "";
+            loading("Loading that parcel…");
+            fetch(q({ where: "Strap = '" + esc(strap) + "'", outFields: FIELDS, returnGeometry: "true", outSR: "4326", resultRecordCount: 1, f: "geojson" }))
+              .then(r => r.json())
+              .then(gj => {
+                const layer = show(gj);
+                if (layer) map.fitBounds(layer.getBounds(), { maxZoom: 18, padding: [40, 40] });
+                else failed("That parcel has no mapped shape.");
+              })
+              .catch(err => failed("Could not load that parcel: " + err.message));
+          });
+        });
+      })
+      .catch(() => closeHits());
+  }, 260);
+});
+input.addEventListener("blur", () => setTimeout(closeHits, 140));
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeHits(); });
+</script>
+</body>
+</html>

@@ -36,9 +36,11 @@ streamlit run app.py
 
 The repository also includes a project-scoped Copilot canvas at
 `.github/extensions/case-search/`. Open **Cape Coral Case Search** from
-Copilot to search the same `cases.parquet` data in an interactive table,
-filter by year, status, type, or officer, inspect individual case details,
-and export the displayed records as CSV.
+Copilot to use the supplied dashboard pages for code enforcement, officers,
+planning projects, contractors, building permits, inspections, parcel lookup,
+public works, and city salaries. The pages that use City open-data services
+query those live sources; planning, contractor, and salary pages include their
+referenced datasets.
 
 The canvas requires Python with the packages in `requirements.txt` available
 to Copilot, plus `cases.parquet` in the repository root.

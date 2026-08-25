@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cape Coral Public Works — stormwater &amp; infrastructure map</title>
+<link rel="stylesheet" href="_ds/nocturne-5223f3d0-36d8-45ce-9356-2ac9c8ce1793/styles.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha384-sHL9NAb7lN7rfvG5lfHpm643Xkcjzp4jFvuavGOndn6pjVqS6ny56CAt3nsEVT4H" crossorigin="anonymous">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha384-cxOPjt7s7Iz04uaHJceBmS+qpjv2JkIHNVcuOrM+YHwZOmJGBXI00mdUXEq65HTH" crossorigin="anonymous"></script>
+<style>
+  body { margin: 0; background: var(--color-bg); color: var(--color-text); font-family: var(--font-body); font-size: 14px; }
+  a { color: var(--color-accent); text-decoration: none; }
+  a:hover { color: var(--color-accent-400); text-decoration: underline; }
+  .leaflet-container { background: #10111c; font-family: var(--font-body); }
+  .leaflet-tile-pane { filter: grayscale(0.6) brightness(0.62) contrast(1.1); }
+  .leaflet-control-attribution { background: rgba(22,24,38,0.82) !important; color: color-mix(in srgb, var(--color-text) 55%, transparent) !important; font-size: 10px !important; }
+  .leaflet-control-attribution a { color: var(--color-accent-300) !important; }
+  .leaflet-bar a { background: var(--color-surface) !important; color: var(--color-text) !important; border-color: #3f424d !important; }
+  .lyr { display: flex; align-items: center; gap: 8.4px; padding: 5.6px 0; font-size: 12.5px; cursor: pointer; border-top: 1px solid var(--color-divider); }
+  .lyr input { accent-color: var(--color-accent); }
+  .swatch { width: 11px; height: 11px; border-radius: 3px; flex: none; }
+  .cnt { margin-left: auto; font-variant-numeric: tabular-nums; font-size: 11.5px; color: color-mix(in srgb, var(--color-text) 45%, transparent); }
+  .row { display: grid; grid-template-columns: 128px 1fr; gap: 4px 11.2px; align-items: baseline; font-size: 12.5px; }
+  .lbl { color: color-mix(in srgb, var(--color-text) 50%, transparent); }
+  #split { display: flex; flex: 1; min-height: 0; }
+  #side { flex: none; width: 300px; overflow-y: auto; padding: 16.8px; background: var(--color-surface); box-shadow: var(--shadow-sm); }
+  #map { flex: 1; min-width: 0; }
+  #detail { flex: none; width: 320px; overflow-y: auto; padding: 16.8px; background: var(--color-surface); box-shadow: var(--shadow-sm); }
+  @media (max-width: 1180px) { #detail { display: none; } }
+  @media (max-width: 900px) {
+    #split { flex-direction: column; }
+    #side { width: auto; max-height: 34vh; }
+    #map { flex: none; height: 52vh; width: 100%; }
+  }
+</style>
+</head>
+<body>
+<div style="display:flex; flex-direction:column; height:100vh; overflow:hidden">
+
+  <div style="flex:none; padding:16.8px 22.4px 11.2px">
+    <div style="display:flex; flex-wrap:wrap; gap:16.8px; font-size:12.5px; margin-bottom:11.2px">
+      <a href="Case Search v2.dc.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Code enforcement cases</a>
+      <a href="Officers.dc.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Officers</a>
+      <a href="Planning Projects.dc.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Planning projects</a>
+      <a href="Contractors.dc.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Contractors</a>
+      <a href="Building Permits.dc.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Building permits</a>
+      <a href="Inspections.dc.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Inspections</a>
+      <a href="Parcel Map.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Parcel map</a>
+      <span style="color:var(--color-accent-300)">Public works</span>
+      <a href="City Salaries.dc.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Salaries</a>
+    </div>
+    <div style="display:flex; align-items:baseline; gap:8.4px; flex-wrap:wrap">
+      <h1 style="font-size:24px; margin:0; letter-spacing:-0.02em">Public Works Infrastructure</h1>
+      <span class="tag tag-outline" style="align-self:center">Live</span>
+      <span id="status" style="font-size:12px; color:color-mix(in srgb, var(--color-text) 45%, transparent)"></span>
+    </div>
+    <p style="margin:5.6px 0 0; font-size:13.5px; max-width:680px; line-height:1.5; color:color-mix(in srgb, var(--color-text) 65%, transparent); text-wrap:pretty">The city's stormwater and street network as built: retention ponds, inlets, outlets, pipes, weirs, canals, sidewalks and bridges. Turn layers on, pan to a neighborhood, click any feature for its record.</p>
+  </div>
+
+  <div id="split">
+    <div id="side">
+      <div style="font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--color-accent); margin-bottom:5.6px">Stormwater</div>
+      <div id="grp-storm"></div>
+      <div style="font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--color-accent); margin:16.8px 0 5.6px">Streets &amp; paths</div>
+      <div id="grp-street"></div>
+      <div style="margin-top:16.8px; font-size:11.5px; line-height:1.55; color:color-mix(in srgb, var(--color-text) 42%, transparent); text-wrap:pretty">Features load for the area you're viewing. Layers with a zoom floor stay off until you're close enough that the request is reasonable — the count shown is what's drawn now, not the citywide total.</div>
+    </div>
+
+    <div id="map"></div>
+
+    <div id="detail">
+      <div style="font-size:13.5px; line-height:1.6; color:color-mix(in srgb, var(--color-text) 55%, transparent); text-wrap:pretty">Click a feature to read its record.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const PW = "https://capeims.capecoral.gov/arcgis/rest/services/OpenData/PublicWorks/MapServer";
+
+const LAYERS = [
+  { id: 17, group: "storm", name: "Retention / detention areas", kind: "poly", color: "#9184d9", minZoom: 12, on: true },
+  { id: 16, group: "storm", name: "Exfiltration areas", kind: "poly", color: "#5d5294", minZoom: 13, on: false },
+  { id: 11, group: "storm", name: "Canals", kind: "poly", color: "#4c5397", minZoom: 12, on: true },
+  { id: 15, group: "storm", name: "Storm pipes", kind: "line", color: "#b5abfc", minZoom: 15, on: false },
+  { id: 14, group: "storm", name: "Storm inlets", kind: "point", color: "#d2cefd", minZoom: 15, on: false },
+  { id: 19, group: "storm", name: "Storm outlets", kind: "point", color: "#9690c9", minZoom: 14, on: false },
+  { id: 20, group: "storm", name: "Storm manholes", kind: "point", color: "#7972a9", minZoom: 16, on: false },
+  { id: 18, group: "storm", name: "Weirs", kind: "point", color: "#e7e5fe", minZoom: 13, on: true },
+  { id: 6,  group: "street", name: "Major streets", kind: "line", color: "#9397ab", minZoom: 13, on: false },
+  { id: 2,  group: "street", name: "Sidewalks", kind: "line", color: "#e9e9ed", minZoom: 15, on: false },
+  { id: 0,  group: "street", name: "Bridges", kind: "line", color: "#b5afe8", minZoom: 13, on: true },
+  { id: 10, group: "street", name: "Medians", kind: "poly", color: "#595d6c", minZoom: 14, on: false },
+  { id: 3,  group: "street", name: "Multi-use paths", kind: "line", color: "#a7a1db", minZoom: 14, on: false },
+  { id: 4,  group: "street", name: "Bike paths", kind: "line", color: "#968ae0", minZoom: 14, on: false },
+  { id: 5,  group: "street", name: "Bike lanes", kind: "line", color: "#796cbf", minZoom: 14, on: false },
+  { id: 13, group: "street", name: "Easements", kind: "poly", color: "#423a6a", minZoom: 15, on: false }
+];
+const CAP = 900;
+
+const map = L.map("map", { center: [26.5765, -81.9498], zoom: 13 });
+L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  attribution: '© OpenStreetMap contributors · infrastructure: City of Cape Coral Public Works',
+  maxZoom: 19
+}).addTo(map);
+
+const statusEl = document.getElementById("status");
+const detailEl = document.getElementById("detail");
+const state = {};
+LAYERS.forEach(l => { state[l.id] = { cfg: l, on: l.on, layer: null, count: 0, token: 0 }; });
+
+function skip(k) {
+  return k === "Shape" || k === "SHAPE" || /^Shape\./.test(k) || /^(OBJECTID|ESRI_OID|GlobalID|globalid)$/i.test(k);
+}
+function pretty(k) {
+  return k.replace(/_/g, " ").replace(/([a-z])([A-Z])/g, "$1 $2");
+}
+function showDetail(name, props) {
+  const rows = Object.keys(props || {})
+    .filter(k => !skip(k) && props[k] !== null && String(props[k]).trim() !== "")
+    .map(k => '<div class="lbl">' + pretty(k) + '</div><div>' + String(props[k]).trim() + '</div>')
+    .join("");
+  detailEl.innerHTML =
+    '<div style="font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--color-accent)">' + name + '</div>'
+    + '<div style="height:8.4px"></div>'
+    + (rows ? '<div class="row">' + rows + '</div>'
+            : '<div style="font-size:13px; color:color-mix(in srgb, var(--color-text) 50%, transparent)">This feature carries no attributes beyond its geometry.</div>');
+}
+
+function styleFor(cfg) {
+  if (cfg.kind === "poly") return { color: cfg.color, weight: 1, fillColor: cfg.color, fillOpacity: 0.28 };
+  return { color: cfg.color, weight: cfg.kind === "line" ? 2 : 1 };
+}
+
+function load(entry) {
+  const cfg = entry.cfg;
+  if (entry.layer) { map.removeLayer(entry.layer); entry.layer = null; }
+  if (!entry.on) { entry.count = 0; paintCounts(); return; }
+  if (map.getZoom() < cfg.minZoom) { entry.count = -1; paintCounts(); return; }
+
+  const b = map.getBounds();
+  const env = [b.getWest(), b.getSouth(), b.getEast(), b.getNorth()].join(",");
+  const my = ++entry.token;
+  const url = PW + "/" + cfg.id + "/query?" + [
+    "geometry=" + encodeURIComponent(env),
+    "geometryType=esriGeometryEnvelope",
+    "inSR=4326", "outSR=4326",
+    "spatialRel=esriSpatialRelIntersects",
+    "outFields=*", "returnGeometry=true",
+    "resultRecordCount=" + CAP, "f=geojson"
+  ].join("&");
+
+  busy(1);
+  fetch(url).then(r => r.json()).then(gj => {
+    busy(-1);
+    if (my !== entry.token || !entry.on) return;
+    const feats = (gj && gj.features) || [];
+    entry.count = feats.length;
+    entry.layer = L.geoJSON(gj, {
+      style: styleFor(cfg),
+      pointToLayer: (f, latlng) => L.circleMarker(latlng, {
+        radius: 3.5, color: cfg.color, weight: 1, fillColor: cfg.color, fillOpacity: 0.85
+      }),
+      onEachFeature: (f, lyr) => lyr.on("click", ev => {
+        L.DomEvent.stopPropagation(ev);
+        showDetail(cfg.name, f.properties);
+      })
+    }).addTo(map);
+    paintCounts();
+  }).catch(() => { busy(-1); if (my === entry.token) { entry.count = -2; paintCounts(); } });
+}
+
+let pending = 0;
+function busy(d) {
+  pending += d;
+  statusEl.textContent = pending > 0 ? "loading…" : "";
+}
+
+function paintCounts() {
+  LAYERS.forEach(l => {
+    const el = document.getElementById("cnt-" + l.id);
+    if (!el) return;
+    const e = state[l.id];
+    if (!e.on) el.textContent = "";
+    else if (e.count === -1) el.textContent = "zoom to " + l.minZoom;
+    else if (e.count === -2) el.textContent = "failed";
+    else el.textContent = e.count >= CAP ? CAP + "+" : String(e.count);
+  });
+}
+
+function buildControls() {
+  ["storm", "street"].forEach(g => {
+    const host = document.getElementById("grp-" + g);
+    host.innerHTML = LAYERS.filter(l => l.group === g).map(l =>
+      '<label class="lyr">'
+      + '<input type="checkbox" data-id="' + l.id + '"' + (l.on ? " checked" : "") + '>'
+      + '<span class="swatch" style="background:' + l.color + '"></span>'
+      + '<span>' + l.name + '</span>'
+      + '<span class="cnt" id="cnt-' + l.id + '"></span>'
+      + '</label>').join("");
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('#side input[type="checkbox"]'), box => {
+    box.addEventListener("change", () => {
+      const id = Number(box.getAttribute("data-id"));
+      state[id].on = box.checked;
+      load(state[id]);
+    });
+  });
+}
+
+function loadAll() { LAYERS.forEach(l => load(state[l.id])); }
+
+buildControls();
+loadAll();
+map.on("moveend", loadAll);
+map.on("click", () => {
+  detailEl.innerHTML = '<div style="font-size:13.5px; color:color-mix(in srgb, var(--color-text) 55%, transparent)">Click a feature to read its record.</div>';
+});
+</script>
+</body>
+</html>

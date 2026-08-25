@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/nocturne-5223f3d0-36d8-45ce-9356-2ac9c8ce1793/styles.css">
+<script src="_ds/nocturne-5223f3d0-36d8-45ce-9356-2ac9c8ce1793/_ds_bundle.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap">
+<style>
+  body { margin: 0; background: #161826; }
+  a { color: var(--color-accent); text-decoration: none; }
+  a:hover { color: var(--color-accent-400); text-decoration: underline; }
+</style>
+</helmet>
+<div style="min-height:100vh; display:flex; flex-direction:column; background:var(--color-bg); color:var(--color-text); font-family:var(--font-body); font-size:14px">
+
+  <div style="flex:1; width:100%; max-width:1120px; margin:0 auto; padding:0 22.4px; box-sizing:border-box">
+
+    <div style="display:flex; gap:16.8px; padding:16.8px 0 0; font-size:12.5px">
+      <a href="Case Search v2.dc.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Code enforcement cases</a>
+      <a href="Officers.dc.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Officers</a>
+      <span style="color:var(--color-accent-300)">Planning projects</span>
+      <a href="Contractors.dc.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Contractors</a>
+      <a href="Building Permits.dc.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Building permits</a>
+      <a href="Inspections.dc.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Inspections</a>
+      <a href="Parcel Map.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Parcel map</a>
+      <a href="Public Works.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Public works</a>
+      <a href="City Salaries.dc.html" style="color:color-mix(in srgb, var(--color-text) 55%, transparent)">Salaries</a>
+    </div>
+
+    <div style="margin-top:{{ heroTop }}; transition:margin-top 220ms ease">
+      <h1 style="font-size:26px; margin:0 0 8.4px; letter-spacing:-0.02em">Cape Coral Planning Project Search</h1>
+      <p style="margin:0 0 16.8px; font-size:14.5px; line-height:1.55; max-width:640px; color:color-mix(in srgb, var(--color-text) 68%, transparent); text-wrap:pretty">Search the city's planning and development review file — pre-application meetings, site plans, vacations, appeals, utility extensions and master plans. Look one up by plan number, address, parcel, or anything in the project description.</p>
+
+      <div style="display:flex; flex-wrap:wrap; gap:8.4px; align-items:center; max-width:760px">
+        <div style="position:relative; display:flex; align-items:center; flex:1; min-width:240px">
+          <svg width="17" height="17" viewBox="0 0 256 256" fill="currentColor" style="position:absolute; left:11px; opacity:0.4; pointer-events:none"><path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"></path></svg>
+          <input class="input" ref="{{ searchRef }}" value="{{ q }}" onChange="{{ onQuery }}" onKeyDown="{{ onKey }}" placeholder="126 NW 6th Ter, PRAP22-000011, Pine Island Rd, 114423C2026140100…" style="width:100%; padding:11.2px 11.2px 11.2px 36px; font-size:15px">
+        </div>
+        <button class="btn btn-primary" onClick="{{ onSearch }}" style="padding:11.2px 22.4px; font-size:14.5px">Search</button>
+      </div>
+
+      <div style="display:flex; flex-wrap:wrap; gap:5.6px; align-items:center; margin-top:11.2px; min-height:30px">
+        <button class="btn btn-secondary" onClick="{{ onToggleFilters }}" style="font-size:13px; gap:7px">
+          <svg width="14" height="14" viewBox="0 0 256 256" fill="currentColor"><path d="M40,88H73a32,32,0,0,0,62,0h81a8,8,0,0,0,0-16H135a32,32,0,0,0-62,0H40a8,8,0,0,0,0,16Zm64-24a16,16,0,1,1-16,16A16,16,0,0,1,104,64ZM216,168H199a32,32,0,0,0-62,0H40a8,8,0,0,0,0,16h97a32,32,0,0,0,62,0h17a8,8,0,0,0,0-16Zm-48,24a16,16,0,1,1,16-16A16,16,0,0,1,168,192Z"></path></svg>
+          {{ filtersLabel }}
+        </button>
+        <sc-for list="{{ chips }}" as="c" hint-placeholder-count="0">
+          <button class="tag tag-accent" onClick="{{ c.onRemove }}" style="border:0; cursor:pointer; font-family:var(--font-body); gap:7px">{{ c.label }} <span style="opacity:0.55">✕</span></button>
+        </sc-for>
+        <span style="font-size:12px; color:color-mix(in srgb, var(--color-text) 45%, transparent); margin-left:5.6px">{{ loadLabel }}</span>
+      </div>
+
+      <sc-if value="{{ filtersOpen }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-top:11.2px; padding:16.8px; border-radius:8px; background:var(--color-surface); box-shadow:var(--shadow-sm); display:flex; flex-wrap:wrap; gap:11.2px">
+          <label class="field" style="display:flex; flex-direction:column; gap:4px; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:color-mix(in srgb, var(--color-text) 55%, transparent)">Year applied
+            <select class="input" value="{{ year }}" onChange="{{ onYear }}" style="padding:5.6px 8.4px; font-size:13px; text-transform:none; letter-spacing:0; color:var(--color-text)">
+              <option value="">Any year</option>
+              <sc-for list="{{ years }}" as="y" hint-placeholder-count="8"><option value="{{ y }}">{{ y }}</option></sc-for>
+            </select>
+          </label>
+          <label class="field" style="display:flex; flex-direction:column; gap:4px; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:color-mix(in srgb, var(--color-text) 55%, transparent)">Status
+            <select class="input" value="{{ status }}" onChange="{{ onStatus }}" style="padding:5.6px 8.4px; font-size:13px; text-transform:none; letter-spacing:0; color:var(--color-text)">
+              <option value="">Any status</option>
+              <sc-for list="{{ statuses }}" as="s" hint-placeholder-count="6"><option value="{{ s }}">{{ s }}</option></sc-for>
+            </select>
+          </label>
+          <label class="field" style="display:flex; flex-direction:column; gap:4px; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:color-mix(in srgb, var(--color-text) 55%, transparent)">Plan type
+            <select class="input" value="{{ type }}" onChange="{{ onType }}" style="padding:5.6px 8.4px; font-size:13px; max-width:280px; text-transform:none; letter-spacing:0; color:var(--color-text)">
+              <option value="">Any plan type</option>
+              <sc-for list="{{ types }}" as="t" hint-placeholder-count="10"><option value="{{ t }}">{{ t }}</option></sc-for>
+            </select>
+          </label>
+          <label class="field" style="display:flex; flex-direction:column; gap:4px; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:color-mix(in srgb, var(--color-text) 55%, transparent)">Zip
+            <select class="input" value="{{ zip }}" onChange="{{ onZip }}" style="padding:5.6px 8.4px; font-size:13px; text-transform:none; letter-spacing:0; color:var(--color-text)">
+              <option value="">Any zip</option>
+              <sc-for list="{{ zips }}" as="z" hint-placeholder-count="6"><option value="{{ z }}">{{ z }}</option></sc-for>
+            </select>
+          </label>
+        </div>
+      </sc-if>
+    </div>
+
+    <sc-if value="{{ searched }}" hint-placeholder-val="{{ false }}">
+      <div style="margin-top:22.4px">
+        <div style="font-size:12.5px; color:color-mix(in srgb, var(--color-text) 58%, transparent); margin-bottom:8.4px">{{ countLabel }}</div>
+
+        <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:48px 0; font-size:15px; color:color-mix(in srgb, var(--color-text) 60%, transparent)">Nothing matched that search.</div>
+        </sc-if>
+
+        <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+          <div>
+            <div style="display:grid; grid-template-columns:152px minmax(180px,1fr) 232px 104px 104px; gap:11.2px; padding:0 8.4px 8.4px; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:color-mix(in srgb, var(--color-text) 55%, transparent)">
+              <div>Plan number</div><div>Address</div><div>Plan type</div><div>Status</div><div>Applied</div>
+            </div>
+            <sc-for list="{{ rows }}" as="r" hint-placeholder-count="8">
+              <div style="border-top:1px solid var(--color-divider)">
+                <div onClick="{{ r.onToggle }}" style="display:grid; grid-template-columns:152px minmax(180px,1fr) 232px 104px 104px; gap:11.2px; padding:11.2px 8.4px; cursor:pointer; font-size:13.5px; background:{{ r.bg }}">
+                  <div style="font-variant-numeric:tabular-nums; color:var(--color-accent-300)">{{ r.planNumber }}</div>
+                  <div>{{ r.address }}</div>
+                  <div style="color:color-mix(in srgb, var(--color-text) 78%, transparent)">{{ r.planType }}</div>
+                  <div><span class="tag {{ r.statusTag }}">{{ r.status }}</span></div>
+                  <div style="font-variant-numeric:tabular-nums; color:color-mix(in srgb, var(--color-text) 65%, transparent)">{{ r.applied }}</div>
+                </div>
+                <sc-if value="{{ r.open }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex; gap:22.4px; padding:5.6px 8.4px 22.4px; align-items:flex-start">
+                    <div style="flex:1; min-width:0">
+                      <div style="font-size:13.5px; line-height:1.6; max-width:70ch; text-wrap:pretty">{{ r.description }}</div>
+                      <div style="display:grid; grid-template-columns:104px 1fr; gap:5.6px 11.2px; margin-top:11.2px; font-size:12.5px; align-items:baseline">
+                        <div style="color:color-mix(in srgb, var(--color-text) 50%, transparent)">Work class</div><div>{{ r.workClass }}</div>
+                        <div style="color:color-mix(in srgb, var(--color-text) 50%, transparent)">Parcel (STRAP)</div><div style="font-variant-numeric:tabular-nums">{{ r.parcel }} · <a href="{{ r.parcelUrl }}">View parcel record</a></div>
+                        <div style="color:color-mix(in srgb, var(--color-text) 50%, transparent)">Dates</div><div style="font-variant-numeric:tabular-nums">{{ r.dateLine }}</div>
+                        <div style="color:color-mix(in srgb, var(--color-text) 50%, transparent)">Location</div><div>{{ r.place }}</div>
+                        <div style="color:color-mix(in srgb, var(--color-text) 50%, transparent)">Value / area</div><div style="font-variant-numeric:tabular-nums">{{ r.valueLine }}</div>
+                      </div>
+                    </div>
+                    <div style="flex:none; width:148px">
+                      <div style="position:relative; height:104px; border-radius:8px; overflow:hidden; background:var(--color-neutral-900); box-shadow:var(--shadow-sm)">
+                        <div style="position:absolute; inset:0; background:linear-gradient(to right, transparent 32%, color-mix(in srgb, var(--color-text) 9%, transparent) 32%, color-mix(in srgb, var(--color-text) 9%, transparent) 34%, transparent 34%), linear-gradient(to bottom, transparent 58%, color-mix(in srgb, var(--color-text) 9%, transparent) 58%, color-mix(in srgb, var(--color-text) 9%, transparent) 60%, transparent 60%), repeating-linear-gradient(to right, transparent 0 22px, color-mix(in srgb, var(--color-text) 4%, transparent) 22px 23px), repeating-linear-gradient(to bottom, transparent 0 22px, color-mix(in srgb, var(--color-text) 4%, transparent) 22px 23px)"></div>
+                        <div style="position:absolute; left:{{ r.pinX }}; top:{{ r.pinY }}; width:9px; height:9px; margin:-5px 0 0 -5px; border-radius:9px; background:var(--color-accent); box-shadow:0 0 0 4px color-mix(in srgb, var(--color-accent) 28%, transparent)"></div>
+                      </div>
+                      <div style="font-size:11px; margin-top:4px; color:color-mix(in srgb, var(--color-text) 45%, transparent)">Approximate location</div>
+                    </div>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex; flex-direction:column; gap:8.4px">
+            <sc-for list="{{ rows }}" as="r" hint-placeholder-count="6">
+              <div class="card" onClick="{{ r.onToggle }}" style="cursor:pointer; gap:5.6px">
+                <div style="display:flex; justify-content:space-between; gap:8.4px; align-items:baseline">
+                  <span style="font-size:12.5px; font-variant-numeric:tabular-nums; color:var(--color-accent-300)">{{ r.planNumber }}</span>
+                  <span class="tag {{ r.statusTag }}">{{ r.status }}</span>
+                </div>
+                <div style="font-family:var(--font-heading); font-weight:500; font-size:16px">{{ r.address }}</div>
+                <div style="font-size:12.5px; color:color-mix(in srgb, var(--color-text) 62%, transparent)">{{ r.planType }}</div>
+                <div style="font-size:12px; color:color-mix(in srgb, var(--color-text) 48%, transparent)">Applied {{ r.applied }}</div>
+                <sc-if value="{{ r.open }}" hint-placeholder-val="{{ false }}">
+                  <div style="margin-top:5.6px; display:flex; flex-direction:column; gap:8.4px">
+                    <div style="font-size:13.5px; line-height:1.6; text-wrap:pretty">{{ r.description }}</div>
+                    <div style="font-size:12.5px; color:color-mix(in srgb, var(--color-text) 60%, transparent)">Parcel (STRAP) <span style="font-variant-numeric:tabular-nums; color:var(--color-text)">{{ r.parcel }}</span> · <a href="{{ r.parcelUrl }}">View parcel record</a></div>
+                    <div style="font-size:12.5px; color:color-mix(in srgb, var(--color-text) 60%, transparent)">{{ r.dateLine }}</div>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ hasMore }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:16.8px 8.4px; border-top:1px solid var(--color-divider)">
+            <button class="btn btn-secondary" onClick="{{ onMore }}" style="font-size:13px">{{ moreLabel }}</button>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+  </div>
+
+  <div style="flex:none; margin-top:56px; padding:16.8px 22.4px 22.4px">
+    <div style="max-width:1120px; margin:0 auto; display:flex; flex-wrap:wrap; gap:11.2px; justify-content:space-between; font-size:11.5px; color:color-mix(in srgb, var(--color-text) 42%, transparent)">
+      <div>{{ footNote }}</div>
+      <div>by Chano</div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;pageSize&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:25,&quot;min&quot;:10,&quot;max&quot;:100,&quot;step&quot;:5,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Results&quot;}}">
+const CSV_URL = "uploads/Planning_Projects-2b87ff05.csv";
+const MONTH = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const SUFFIX = { avenue:"ave", av:"ave", drive:"dr", court:"ct", street:"st", road:"rd", boulevard:"blvd", lane:"ln", place:"pl", terrace:"ter", circle:"cir", parkway:"pkwy", trail:"trl", highway:"hwy" };
+
+function parseCSV(text) {
+  const rows = [];
+  let row = [], field = "", inQ = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (inQ) {
+      if (c === '"') { if (text[i + 1] === '"') { field += '"'; i++; } else inQ = false; }
+      else field += c;
+    } else if (c === '"') inQ = true;
+    else if (c === ",") { row.push(field); field = ""; }
+    else if (c === "\n") { row.push(field); field = ""; rows.push(row); row = []; }
+    else if (c !== "\r") field += c;
+  }
+  if (field.length || row.length) { row.push(field); rows.push(row); }
+  return rows;
+}
+function title(s) {
+  return s.toLowerCase().replace(/\b([a-z])/g, m => m.toUpperCase())
+    .replace(/\b(\d+)(st|nd|rd|th)\b/gi, (m, n, o) => n + o.toLowerCase())
+    .replace(/\b(n|s|e|w|ne|nw|se|sw)\b/gi, m => m.toUpperCase());
+}
+function shortDate(s) {
+  if (!s) return "";
+  const m = /^(\d{4})\/(\d{2})\/(\d{2})/.exec(s.trim());
+  if (!m) return "";
+  return MONTH[+m[2] - 1] + " " + m[3] + ", " + m[1];
+}
+function norm(s) {
+  return String(s).toLowerCase().replace(/[.,#/]/g, " ").split(/\s+/).filter(Boolean)
+    .map(w => SUFFIX[w] || w).join(" ");
+}
+function tagFor(s) {
+  const v = s.toLowerCase();
+  if (v === "submitted" || v === "in review" || v === "pending") return "tag-accent";
+  if (v === "denied" || v === "rejected") return "tag-outline";
+  return "tag-neutral";
+}
+function pct(str, lo, span) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
+  return (lo + (h % span)) + "%";
+}
+
+class Component extends DCLogic {
+  state = { q: "", aq: "", searched: false, filtersOpen: false, year: "", status: "", type: "", zip: "", openId: null, limit: 0, wide: true, data: null, error: "" };
+
+  constructor(props) {
+    super(props);
+    this.searchRef = React.createRef();
+  }
+
+  componentDidMount() {
+    this._resize = () => {
+      const wide = window.innerWidth >= 1040;
+      if (wide !== this.state.wide) this.setState({ wide });
+    };
+    this._resize();
+    window.addEventListener("resize", this._resize);
+    this._key = e => { if (e.key === "Escape") this.setState({ openId: null }); };
+    window.addEventListener("keydown", this._key);
+
+    fetch(CSV_URL).then(r => {
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return r.text();
+    }).then(text => {
+      const rows = parseCSV(text);
+      const head = rows.shift().map(h => h.trim());
+      const ix = {};
+      head.forEach((h, i) => { ix[h] = i; });
+      const g = (r, k) => (r[ix[k]] || "").trim();
+      const data = [];
+      rows.forEach((r, i) => {
+        if (r.length < head.length - 2) return;
+        const planNumber = g(r, "PLANNUMBER");
+        if (!planNumber) return;
+        const addr = [g(r, "MAIN_SITE_ADDR1"), g(r, "MAIN_SITE_PREDIRECTION"), g(r, "MAIN_SITE_ADDR2"), g(r, "MAIN_SITE_STREETTYPE"), g(r, "MAIN_SITE_POSTDIRECTION"), g(r, "MAIN_SITE_UNITSUITE")]
+          .filter(v => v && v.toLowerCase() !== "parcel").join(" ");
+        const applied = g(r, "aplplicationdate");
+        const value = parseFloat(g(r, "plan_value")) || 0;
+        const sqft = parseFloat(g(r, "SQUAREFEET")) || 0;
+        const parcel = g(r, "MAIN_SITE_PARCEL");
+        const zip = g(r, "MAIN_SITE_Zip");
+        const city = title(g(r, "MAIN_SITE_City"));
+        const rec = {
+          id: i,
+          planNumber,
+          address: addr ? title(addr) : "No site address on record",
+          planType: g(r, "Plan_Type"),
+          workClass: g(r, "Work_Class") || "—",
+          status: g(r, "STATUS") || "—",
+          description: g(r, "Plan_Description") || "No description on record.",
+          parcel: parcel || "—",
+          parcelUrl: "#parcel-" + (parcel || planNumber),
+          applied: shortDate(applied),
+          appliedKey: applied.slice(0, 10),
+          year: applied.slice(0, 4),
+          expires: shortDate(g(r, "expiredate")),
+          completed: shortDate(g(r, "completedate")),
+          zip, city,
+          place: [city, zip].filter(Boolean).join(" ") || "—",
+          statusTag: tagFor(g(r, "STATUS")),
+          pinX: pct(parcel + planNumber, 22, 56),
+          pinY: pct(planNumber + parcel, 20, 60)
+        };
+        rec.dateLine = ["Applied " + (rec.applied || "—"), rec.completed ? "completed " + rec.completed : "", rec.expires ? "expires " + rec.expires : ""].filter(Boolean).join(" · ");
+        rec.valueLine = (value ? "$" + value.toLocaleString() : "No value recorded") + (sqft ? " · " + sqft.toLocaleString() + " sq ft" : "");
+        rec.hay = norm([rec.planNumber, rec.address, rec.planType, rec.workClass, rec.status, rec.description, rec.parcel, rec.zip, rec.year].join(" "));
+        data.push(rec);
+      });
+      data.sort((a, b) => a.appliedKey < b.appliedKey ? 1 : -1);
+      this.setState({ data });
+    }).catch(e => this.setState({ error: String(e.message || e) }));
+  }
+  componentWillUnmount() {
+    window.removeEventListener("resize", this._resize);
+    window.removeEventListener("keydown", this._key);
+  }
+
+  submit() { this.setState(s => ({ aq: s.q, searched: true, openId: null, limit: 0 })); }
+  set(k) { return e => this.setState({ [k]: e.target.value, openId: null, limit: 0 }); }
+
+  distinct(key, sort) {
+    const d = this.state.data || [];
+    const set = {};
+    d.forEach(r => { if (r[key]) set[r[key]] = 1; });
+    const out = Object.keys(set);
+    return sort === "desc" ? out.sort().reverse() : out.sort();
+  }
+
+  renderVals() {
+    const st = this.state;
+    const page = this.props.pageSize ?? 25;
+    const data = st.data || [];
+    const terms = norm(st.aq).split(" ").filter(Boolean);
+    const matches = st.searched
+      ? data.filter(r =>
+          (!st.year || r.year === st.year) &&
+          (!st.status || r.status === st.status) &&
+          (!st.type || r.planType === st.type) &&
+          (!st.zip || r.zip === st.zip) &&
+          terms.every(t => r.hay.indexOf(t) !== -1))
+      : [];
+    const limit = st.limit || page;
+    const shown = matches.slice(0, limit);
+
+    const chips = [];
+    const chip = (k, label) => { if (st[k]) chips.push({ label, onRemove: () => this.setState({ [k]: "", openId: null, limit: 0 }) }); };
+    chip("year", "Applied " + st.year);
+    chip("status", st.status);
+    chip("type", st.type);
+    chip("zip", "Zip " + st.zip);
+
+    const rows = shown.map(r => Object.assign({}, r, {
+      open: st.openId === r.id,
+      bg: st.openId === r.id ? "color-mix(in srgb, var(--color-accent) 10%, transparent)" : "transparent",
+      onToggle: () => this.setState(s => ({ openId: s.openId === r.id ? null : r.id }))
+    }));
+
+    return {
+      q: st.q, year: st.year, status: st.status, type: st.type, zip: st.zip,
+      years: this.distinct("year", "desc").filter(y => +y >= 1980 && +y <= 2026),
+      statuses: this.distinct("status"),
+      types: this.distinct("planType"), zips: this.distinct("zip"),
+      searchRef: this.searchRef,
+      heroTop: st.searched ? "22.4px" : "9vh",
+      filtersOpen: st.filtersOpen,
+      filtersLabel: chips.length ? "Filters · " + chips.length : "Filters",
+      loadLabel: st.error ? "Could not load the project file: " + st.error
+        : (st.data ? "" : "Loading project records…"),
+      footNote: st.data
+        ? st.data.length.toLocaleString() + " planning projects, from the city's Planning Projects extract."
+        : "Reading the city's Planning Projects extract.",
+      chips, rows,
+      searched: st.searched,
+      isEmpty: st.searched && !!st.data && matches.length === 0,
+      isDesktop: st.wide && matches.length > 0,
+      isPhone: !st.wide && matches.length > 0,
+      countLabel: matches.length === 0 ? "" :
+        (matches.length === 1 ? "1 project" : matches.length.toLocaleString() + " projects") +
+        " · showing " + shown.length + ", most recent application first",
+      hasMore: matches.length > shown.length,
+      moreLabel: "Show " + Math.min(page, matches.length - shown.length) + " more",
+      onMore: () => this.setState(s => ({ limit: (s.limit || page) + page })),
+      onQuery: e => this.setState({ q: e.target.value }),
+      onKey: e => { if (e.key === "Enter") this.submit(); },
+      onSearch: () => this.submit(),
+      onToggleFilters: () => this.setState(s => ({ filtersOpen: !s.filtersOpen })),
+      onYear: this.set("year"), onStatus: this.set("status"),
+      onType: this.set("type"), onZip: this.set("zip")
+    };
+  }
+}
+</script>
+</body>
+</html>
