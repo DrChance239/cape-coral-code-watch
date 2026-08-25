@@ -65,6 +65,36 @@ for key, column in (("year", "year"), ("status", "status"), ("type", "case_type"
     if value not in (None, ""):
         clauses.append(f"{column} = ?")
         params.append(value)
+owner = request.get("owner", "").strip().lower()
+if owner:
+    for word in owner.split():
+        value = "%" + word + "%"
+        clauses.append("""(
+            LOWER(COALESCE(CAST(owner AS VARCHAR), '')) LIKE ?
+            OR LOWER(COALESCE(CAST(owner_other AS VARCHAR), '')) LIKE ?
+        )""")
+        params.extend([value, value])
+origin = request.get("origin")
+if origin == "named":
+    clauses.append("(UPPER(COALESCE(CAST(case_description AS VARCHAR), '')) LIKE '%PER CP%' OR UPPER(COALESCE(CAST(case_description AS VARCHAR), '')) LIKE '%COMPLAINANT%' OR UPPER(COALESCE(CAST(case_description AS VARCHAR), '')) LIKE '%CALLER%')")
+elif origin == "anon":
+    clauses.append("UPPER(COALESCE(CAST(case_description AS VARCHAR), '')) LIKE '%ANONYMOUS%'")
+elif origin == "neighbor":
+    clauses.append("UPPER(COALESCE(CAST(case_description AS VARCHAR), '')) LIKE '%NEIGHBOR%'")
+zone_officers = {
+    "NE1": "Martin Lehman", "NE2": "Stephanie Folsom", "NE3": "Pam Beesley-Farris",
+    "NE4": "Tammy Whitaker", "NE5": "Patrick Hayhurst", "NW1": "Ioulia Scott",
+    "NW2": "Jeffrey Colon", "NW3": "Scott Irvin", "NW4": "Sherry Kluczynski",
+    "SE1": "Casey Fears", "SE2": "Mark Donisi", "SE3": "Samantha Altman",
+    "SE4": "Frank John", "SE5": "Robert Liguori", "SE6": "Thalia Curtis",
+    "SW1": "Pete Strainovici", "SW2": "John Williams", "SW3": "Mack Cline",
+    "SW4": "Aaron Hurley", "SW5": "Michael Stuff", "SW6": "Jamal Crawford",
+    "MC-N": "Eric Speranza", "MC-C": "David Zimmer", "MC-S": "Andrew Wagner",
+}
+zone = request.get("zone")
+if zone in zone_officers:
+    clauses.append("LOWER(COALESCE(CAST(updated_by AS VARCHAR), '')) = ?")
+    params.append(zone_officers[zone].lower())
 
 where = " AND ".join(clauses)
 if request["mode"] == "detail":
@@ -196,6 +226,9 @@ function renderHtml(initialQuery) {
         <select id="status"><option value="">All statuses</option></select>
         <select id="type"><option value="">All case types</option></select>
         <select id="officer"><option value="">Updated by — anyone</option></select>
+        <select id="origin"><option value="">Who reported it — anyone</option><option value="named">Named complainant</option><option value="anon">Anonymous</option><option value="neighbor">Neighbor</option></select>
+        <input id="owner" autocomplete="off" placeholder="Owner name">
+        <select id="zone"><option value="">Any enforcement zone</option><option value="NE1">NE1</option><option value="NE2">NE2</option><option value="NE3">NE3</option><option value="NE4">NE4</option><option value="NE5">NE5</option><option value="NW1">NW1</option><option value="NW2">NW2</option><option value="NW3">NW3</option><option value="NW4">NW4</option><option value="SE1">SE1</option><option value="SE2">SE2</option><option value="SE3">SE3</option><option value="SE4">SE4</option><option value="SE5">SE5</option><option value="SE6">SE6</option><option value="SW1">SW1</option><option value="SW2">SW2</option><option value="SW3">SW3</option><option value="SW4">SW4</option><option value="SW5">SW5</option><option value="SW6">SW6</option><option value="MC-N">MC-N</option><option value="MC-C">MC-C</option><option value="MC-S">MC-S</option></select>
       </div>
       <div class="summary"><button id="toggle-filters">Filters</button><button id="clear">Clear all</button><span class="muted" id="count-label"></span><span class="spacer"></span><span class="stat">Open <strong id="open-count">—</strong></span><span class="stat">Over 90 days <strong id="aged-count">—</strong></span><span class="stat">Officers <strong id="officer-count">—</strong></span></div>
     </header>
@@ -210,7 +243,7 @@ function renderHtml(initialQuery) {
   </div>
   <script>
     const state = ${state};
-    const fields = ["year", "status", "type", "officer"];
+    const fields = ["year", "status", "type", "officer", "origin", "owner", "zone"];
     const search = document.querySelector("#search");
     let rows = [];
     const esc = value => String(value ?? "—");
@@ -276,6 +309,7 @@ function renderHtml(initialQuery) {
     }
     let timer; search.addEventListener("input", () => { clearTimeout(timer); timer = setTimeout(load, 250); });
     fields.forEach(key => document.querySelector("#" + key).addEventListener("change", load));
+    document.querySelector("#owner").addEventListener("input", () => { clearTimeout(timer); timer = setTimeout(load, 250); });
     document.querySelector("#toggle-filters").addEventListener("click", () => document.querySelector(".filter-row").classList.toggle("open"));
     document.querySelector("#clear").addEventListener("click", () => { search.value = ""; fields.forEach(key => document.querySelector("#" + key).value = ""); document.querySelector("#detail").hidden = true; load(); });
     document.querySelector("#export").addEventListener("click", () => {
@@ -361,6 +395,9 @@ await joinSession({
                             status: { type: "string", maxLength: 200 },
                             type: { type: "string", maxLength: 200 },
                             officer: { type: "string", maxLength: 200 },
+                            origin: { type: "string", enum: ["named", "anon", "neighbor"] },
+                            owner: { type: "string", maxLength: 200 },
+                            zone: { type: "string", maxLength: 4 },
                             limit: { type: "integer", minimum: 1, maximum: 500 },
                         },
                         additionalProperties: false,
