@@ -136,12 +136,17 @@ function renderHtml(initialQuery) {
   <style>
     :root { color-scheme: light dark; }
     * { box-sizing: border-box; }
-    body { margin: 0; min-width: 720px; background: var(--background-color-default, #0d1117); color: var(--text-color-default, #f0f6fc); font: var(--text-body-medium, 14px)/var(--leading-body-medium, 1.5) var(--font-sans, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif); }
+    body { margin: 0; background: var(--background-color-default, #0d1117); color: var(--text-color-default, #f0f6fc); font: var(--text-body-medium, 14px)/var(--leading-body-medium, 1.5) var(--font-sans, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif); }
     button, input, select { font: inherit; }
     .app { height: 100vh; display: flex; flex-direction: column; }
-    header { padding: 18px 24px 12px; border-bottom: 1px solid var(--border-color-default, #30363d); background: var(--background-color-default, #0d1117); }
-    .title-row, .filter-row, .summary { display: flex; align-items: center; gap: 12px; }
-    .title { font-size: 20px; font-weight: var(--font-weight-semibold, 600); letter-spacing: -.015em; }
+    header { width: 100%; max-width: 1120px; margin: 0 auto; padding: 18px 24px 12px; background: var(--background-color-default, #0d1117); }
+    .title-row, .summary { display: flex; align-items: center; gap: 12px; }
+    .nav { display: flex; flex-wrap: wrap; gap: 17px; margin-bottom: 52px; color: var(--text-color-muted, #8b949e); font-size: 12px; }
+    .nav strong { color: var(--true-color-blue, #58a6ff); font-weight: 500; }
+    .hero { max-width: 760px; }
+    .hero h1 { margin: 0; font-size: clamp(24px, 3vw, 30px); line-height: 1.2; letter-spacing: -.02em; }
+    .hero p { max-width: 660px; margin: 8px 0 18px; color: var(--text-color-muted, #8b949e); font-size: 14.5px; line-height: 1.55; }
+    .live { display: inline-block; margin-left: 8px; padding: 2px 7px; border: 1px solid var(--border-color-default, #30363d); border-radius: 999px; color: var(--true-color-blue, #58a6ff); font-size: 11px; vertical-align: middle; }
     .subtitle, .muted { color: var(--text-color-muted, #8b949e); font-size: 12px; }
     .spacer { flex: 1; }
     input, select { min-height: 34px; border: 1px solid var(--border-color-default, #30363d); border-radius: 6px; padding: 6px 9px; color: inherit; background: var(--background-color-default, #0d1117); }
@@ -152,6 +157,8 @@ function renderHtml(initialQuery) {
     button:hover { border-color: var(--color-focus-outline, #58a6ff); }
     button.primary { color: #fff; border-color: #1f6feb; background: #1f6feb; }
     .summary { min-height: 28px; padding-top: 10px; }
+    .filter-row { display: none; align-items: center; gap: 12px; margin-top: 12px; padding: 16px; border: 1px solid var(--border-color-default, #30363d); border-radius: 8px; background: color-mix(in srgb, var(--background-color-default, #0d1117) 88%, var(--color-white, #fff)); }
+    .filter-row.open { display: flex; flex-wrap: wrap; }
     .stat { margin-left: 12px; color: var(--text-color-muted, #8b949e); font-size: 12px; }
     .stat strong { color: var(--text-color-default, #f0f6fc); }
     main { min-height: 0; flex: 1; display: flex; }
@@ -172,24 +179,25 @@ function renderHtml(initialQuery) {
     dt { color: var(--text-color-muted, #8b949e); }
     dd { margin: 0; overflow-wrap: anywhere; }
     .description { margin-top: 22px; border-top: 1px solid var(--border-color-default, #30363d); padding-top: 16px; white-space: pre-wrap; }
-    .empty { padding: 60px 0; text-align: center; color: var(--text-color-muted, #8b949e); }
+    .empty { padding: 48px 0; color: var(--text-color-muted, #8b949e); }
     .error { margin: 18px 24px; padding: 12px; border: 1px solid var(--true-color-red, #f85149); border-radius: 6px; color: var(--true-color-red, #f85149); }
-    @media (max-width: 850px) { body { min-width: 0; } header, .results { padding-left: 14px; padding-right: 14px; } aside { position: fixed; inset: 0 0 0 20%; width: auto; z-index: 2; box-shadow: -8px 0 24px #0006; } .filter-row { align-items: stretch; flex-wrap: wrap; } .filter-row select { flex: 1 1 40%; } th:nth-child(3), td:nth-child(3), th:nth-child(6), td:nth-child(6), th:nth-child(7), td:nth-child(7) { display: none; } }
+    @media (max-width: 850px) { header, .results { padding-left: 14px; padding-right: 14px; } .nav { margin-bottom: 32px; gap: 11px; } aside { position: fixed; inset: 0 0 0 12%; width: auto; z-index: 2; box-shadow: -8px 0 24px #0006; } .filter-row { align-items: stretch; flex-wrap: wrap; } .filter-row select { flex: 1 1 40%; } th:nth-child(3), td:nth-child(3), th:nth-child(6), td:nth-child(6), th:nth-child(7), td:nth-child(7) { display: none; } }
   </style>
 </head>
 <body>
   <div class="app">
     <header>
-      <div class="title-row"><div class="title">Code Case Search</div><span class="subtitle" id="total-label">Loading case data…</span><span class="spacer"></span><button id="export">Export CSV</button></div>
-      <div class="search-wrap"><span class="search-icon">⌕</span><input id="search" autocomplete="off" placeholder="Case number, address, owner, officer, description, case type, STRAP…"></div>
+      <nav class="nav"><strong>Code enforcement cases</strong><span>Officers</span><span>Planning projects</span><span>Contractors</span><span>Building permits</span><span>Inspections</span><span>Parcel map</span><span>Public works</span><span>Salaries</span></nav>
+      <div class="hero"><h1>Cape Coral Code Enforcement Case Search <span class="live">Live</span></h1><p>Look up the code enforcement history of any property in the city. Search the public record by address, owner, case number, officer, description, or parcel.</p></div>
+      <div class="title-row"><span class="subtitle" id="total-label">Loading case data…</span><span class="spacer"></span><button id="export">Export CSV</button></div>
+      <div class="search-wrap"><span class="search-icon">⌕</span><input id="search" autocomplete="off" placeholder="4934 SW 20th Pl, Zubek, CODE22-017213, 164523C1046410330…"></div>
       <div class="filter-row">
         <select id="year"><option value="">All years</option></select>
         <select id="status"><option value="">All statuses</option></select>
         <select id="type"><option value="">All case types</option></select>
         <select id="officer"><option value="">Updated by — anyone</option></select>
-        <button id="clear">Clear all</button>
       </div>
-      <div class="summary"><span class="muted" id="count-label"></span><span class="spacer"></span><span class="stat">Open <strong id="open-count">—</strong></span><span class="stat">Over 90 days <strong id="aged-count">—</strong></span><span class="stat">Officers <strong id="officer-count">—</strong></span></div>
+      <div class="summary"><button id="toggle-filters">Filters</button><button id="clear">Clear all</button><span class="muted" id="count-label"></span><span class="spacer"></span><span class="stat">Open <strong id="open-count">—</strong></span><span class="stat">Over 90 days <strong id="aged-count">—</strong></span><span class="stat">Officers <strong id="officer-count">—</strong></span></div>
     </header>
     <div id="error" class="error" hidden></div>
     <main>
@@ -217,7 +225,7 @@ function renderHtml(initialQuery) {
       rows = result.rows ?? [];
       const summary = result.summary ?? {};
       document.querySelector("#total-label").textContent = (summary.total ?? 0).toLocaleString() + " cases";
-      document.querySelector("#count-label").textContent = "Showing the most recent " + rows.length.toLocaleString() + " matching records";
+      document.querySelector("#count-label").textContent = search.value.trim() ? "Showing the most recent " + rows.length.toLocaleString() + " matching records" : "Recently opened citywide";
       document.querySelector("#open-count").textContent = (summary.open_count ?? 0).toLocaleString();
       document.querySelector("#aged-count").textContent = (summary.aged_count ?? 0).toLocaleString();
       document.querySelector("#officer-count").textContent = (summary.officer_count ?? 0).toLocaleString();
@@ -268,6 +276,7 @@ function renderHtml(initialQuery) {
     }
     let timer; search.addEventListener("input", () => { clearTimeout(timer); timer = setTimeout(load, 250); });
     fields.forEach(key => document.querySelector("#" + key).addEventListener("change", load));
+    document.querySelector("#toggle-filters").addEventListener("click", () => document.querySelector(".filter-row").classList.toggle("open"));
     document.querySelector("#clear").addEventListener("click", () => { search.value = ""; fields.forEach(key => document.querySelector("#" + key).value = ""); document.querySelector("#detail").hidden = true; load(); });
     document.querySelector("#export").addEventListener("click", () => {
       const header = ["case_number","site_address","case_type","status","opened","closed","updated_by","days_to_close"];
