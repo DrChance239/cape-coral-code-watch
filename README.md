@@ -28,6 +28,21 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 
+## Desktop app
+
+Launch the complete dashboard in a native desktop window:
+
+```bash
+python desktop.py
+```
+
+To build a Windows executable after installing the project requirements:
+
+```powershell
+pip install pyinstaller
+pyinstaller --noconfirm --onefile --windowed --add-data ".github\extensions\case-search\public;public" desktop.py
+```
+
 ## Data
 
 `cases.parquet` is a cleaned, optimized version of the public code enforcement records with derived fields (`year`, `days_to_close`, `is_open`).
